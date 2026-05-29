@@ -263,7 +263,7 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
     <p class="home-heading">選擇地區</p>
     <div class="region-grid">
       <div class="region-card" onclick="openRegion('tw')">
-        <div class="flag">🇹🇼</div><div class="region-name">台灣</div><div class="region-cnt">12 個頻道</div>
+        <div class="flag">🇹🇼</div><div class="region-name">台灣</div><div class="region-cnt">186 個頻道</div>
       </div>
       <div class="region-card" onclick="openRegion('hk')">
         <div class="flag">🇭🇰</div><div class="region-name">香港</div><div class="region-cnt">6 個頻道</div>
@@ -353,18 +353,203 @@ const REGIONS = {
 // ═══ CHANNELS ═════════════════════════════════════════════
 const CHANNELS = {
   tw:[
-    {id:'tw01',n:'台視 TTV',    ico:'📡',num:'101'},
-    {id:'tw02',n:'中視 CTV',    ico:'🎬',num:'102'},
-    {id:'tw03',n:'民視 FTV',    ico:'🌐',num:'103'},
-    {id:'tw04',n:'公視 PTS',    ico:'📚',num:'104'},
-    {id:'tw05',n:'TVBS',        ico:'📰',num:'105'},
-    {id:'tw06',n:'TVBS新聞',    ico:'🔴',num:'56' },
-    {id:'tw07',n:'三立台灣台',  ico:'🎭',num:'107'},
-    {id:'tw08',n:'三立新聞台',  ico:'📺',num:'51' },
-    {id:'tw09',n:'東森台',      ico:'🦅',num:'109'},
-    {id:'tw10',n:'東森新聞台',  ico:'🟠',num:'57' },
-    {id:'tw11',n:'年代新聞',    ico:'🗞',num:'52' },
-    {id:'tw12',n:'中天新聞',    ico:'☁️',num:'53' },
+    // ── 無線四台 ───────────────────────────────
+    {id:'tw_1',  n:'愛爾達影劇',    ico:'🎬',num:'1'  },
+    {id:'tw_6',  n:'民視',          ico:'📺',num:'6'  },
+    {id:'tw_8',  n:'台視',          ico:'📡',num:'8'  },
+    {id:'tw_10', n:'中視',          ico:'🎭',num:'10' },
+    {id:'tw_12', n:'華視',          ico:'🌐',num:'12' },
+    {id:'tw_13', n:'公視',          ico:'📚',num:'13' },
+    // ── 公共/原民/客家 ─────────────────────────
+    {id:'tw_14', n:'幸福空間居家',  ico:'🏠',num:'14' },
+    {id:'tw_15', n:'好消息',        ico:'✝️',num:'15' },
+    {id:'tw_16', n:'原住民電視',    ico:'🌿',num:'16' },
+    {id:'tw_17', n:'客家電視',      ico:'🫖',num:'17' },
+    // ── 紀錄片/自然 ───────────────────────────
+    {id:'tw_18', n:'國家地理',      ico:'🌍',num:'18' },
+    {id:'tw_19', n:'探索頻道',      ico:'🔭',num:'19' },
+    {id:'tw_20', n:'中華美食',      ico:'🍜',num:'20' },
+    {id:'tw_21', n:'動物星球',      ico:'🦁',num:'21' },
+    // ── 兒童 ──────────────────────────────────
+    {id:'tw_22', n:'CN卡通',        ico:'🎪',num:'22' },
+    {id:'tw_23', n:'MOMO親子臺',    ico:'🌈',num:'23' },
+    {id:'tw_24', n:'MOMO親子',      ico:'🧒',num:'24' },
+    {id:'tw_25', n:'東森幼幼',      ico:'🐣',num:'25' },
+    {id:'tw_35', n:'YOYO TV',       ico:'🎠',num:'35' },
+    // ── 綜合娛樂 ──────────────────────────────
+    {id:'tw_26', n:'緯來綜合',      ico:'📺',num:'26' },
+    {id:'tw_27', n:'八大第一',      ico:'🎭',num:'27' },
+    {id:'tw_28', n:'八大綜合',      ico:'🎬',num:'28' },
+    {id:'tw_29', n:'三立壹灣',      ico:'🌸',num:'29' },
+    {id:'tw_30', n:'三立都會',      ico:'🏙',num:'30' },
+    {id:'tw_31', n:'衛視中文',      ico:'📡',num:'31' },
+    {id:'tw_32', n:'東森綜合',      ico:'🦅',num:'32' },
+    {id:'tw_33', n:'東森超視',      ico:'📺',num:'33' },
+    {id:'tw_36', n:'中天綜合',      ico:'☁️',num:'36' },
+    {id:'tw_37', n:'東風衛視',      ico:'🌬',num:'37' },
+    {id:'tw_39', n:'中天娛樂',      ico:'🎉',num:'39' },
+    {id:'tw_42', n:'TVBS歡樂',      ico:'😄',num:'42' },
+    {id:'tw_44', n:'八大精彩',      ico:'⭐',num:'44' },
+    {id:'tw_45', n:'JET綜合',       ico:'✈️',num:'45' },
+    {id:'tw_56', n:'TVBS綜合',      ico:'📰',num:'56' },
+    {id:'tw_54', n:'TVBS HD',       ico:'📰',num:'54' },
+    {id:'tw_70', n:'緯來育樂',      ico:'🎡',num:'70' },
+    {id:'tw_77', n:'緯來日本',      ico:'🌸',num:'77' },
+    {id:'tw_78', n:'國興衛視',      ico:'📺',num:'78' },
+    {id:'tw_83', n:'緯來精彩',      ico:'🌟',num:'83' },
+    {id:'tw_86', n:'信大電視',      ico:'📺',num:'86' },
+    {id:'tw_117',n:'壹電視綜合',    ico:'1️⃣',num:'117'},
+    {id:'tw_118',n:'八大娛樂',      ico:'🎊',num:'118'},
+    {id:'tw_131',n:'好消息2',       ico:'✝️',num:'131'},
+    {id:'tw_136',n:'高點綜合',      ico:'📺',num:'136'},
+    {id:'tw_138',n:'中天亞洲',      ico:'🌏',num:'138'},
+    {id:'tw_150',n:'民視綜藝',      ico:'🎭',num:'150'},
+    {id:'tw_151',n:'民視第一台',    ico:'📺',num:'151'},
+    {id:'tw_152',n:'民視台灣',      ico:'📺',num:'152'},
+    {id:'tw_158',n:'台視臺語',      ico:'📡',num:'158'},
+    {id:'tw_213',n:'豬哥亮歌廳秀',  ico:'🎤',num:'213'},
+    {id:'tw_214',n:'ELTA娛樂台',    ico:'🎬',num:'214'},
+    {id:'tw_215',n:'韓國娛樂臺',    ico:'🇰🇷',num:'215'},
+    {id:'tw_222',n:'星衛娛樂',      ico:'⭐',num:'222'},
+    {id:'tw_270',n:'三立國際',      ico:'🌐',num:'270'},
+    {id:'tw_301',n:'三立綜合',      ico:'📺',num:'301'},
+    {id:'tw_309',n:'寰宇綜合',      ico:'🌍',num:'309'},
+    {id:'tw_310',n:'中視菁采',      ico:'🎬',num:'310'},
+    {id:'tw_311',n:'TVBS精采',      ico:'📺',num:'311'},
+    {id:'tw_313',n:'華藝綜合',      ico:'🎨',num:'313'},
+    {id:'tw_314',n:'年代much',      ico:'🎵',num:'314'},
+    {id:'tw_409',n:'台視綜合',      ico:'📡',num:'409'},
+    {id:'tw_450',n:'世新綜合',      ico:'📺',num:'450'},
+    {id:'tw_493',n:'TVN臺灣版',     ico:'📺',num:'493'},
+    {id:'tw_477',n:'TVN',           ico:'📺',num:'477'},
+    {id:'tw_485',n:'天良綜合',      ico:'📺',num:'485'},
+    {id:'tw_491',n:'大立電視',      ico:'📺',num:'491'},
+    {id:'tw_523',n:'雙子衛視',      ico:'♊',num:'523'},
+    {id:'tw_541',n:'綜藝萬花筒',    ico:'🎠',num:'541'},
+    {id:'tw_2103',n:'ELTA綜合',     ico:'📺',num:'2103'},
+    // ── 新聞 ──────────────────────────────────
+    {id:'tw_48', n:'三立LIVE新聞',  ico:'🔴',num:'48' },
+    {id:'tw_49', n:'壹電視新聞',    ico:'1️⃣',num:'49' },
+    {id:'tw_50', n:'年代新聞',      ico:'🗞',num:'50' },
+    {id:'tw_51', n:'東森新聞',      ico:'🟠',num:'51' },
+    {id:'tw_52', n:'中天新聞',      ico:'☁️',num:'52' },
+    {id:'tw_53', n:'民視新聞',      ico:'🔵',num:'53' },
+    {id:'tw_55', n:'TVBS新聞',      ico:'📰',num:'55' },
+    {id:'tw_57', n:'東森財經',      ico:'💹',num:'57' },
+    {id:'tw_59', n:'華視新聞',      ico:'📡',num:'59' },
+    {id:'tw_60', n:'三立iNEWS',     ico:'📱',num:'60' },
+    {id:'tw_90', n:'非凡商業',      ico:'💼',num:'90' },
+    {id:'tw_97', n:'寰宇財經',      ico:'💰',num:'97' },
+    {id:'tw_98', n:'FRANCE 24',     ico:'🇫🇷',num:'98' },
+    {id:'tw_115',n:'台視新聞',      ico:'📡',num:'115'},
+    {id:'tw_116',n:'台視財經',      ico:'💹',num:'116'},
+    {id:'tw_208',n:'寰宇新聞',      ico:'🌐',num:'208'},
+    {id:'tw_286',n:'第1商業',       ico:'💼',num:'286'},
+    {id:'tw_302',n:'靖天資訊',      ico:'📺',num:'302'},
+    {id:'tw_415',n:'半島國際新聞',  ico:'🌍',num:'415'},
+    {id:'tw_599',n:'CBN News',      ico:'✝️',num:'599'},
+    {id:'tw_1295',n:'The Weather Nation',ico:'🌦',num:'1295'},
+    // ── 戲劇/電影 ─────────────────────────────
+    {id:'tw_40', n:'東森戲劇',      ico:'🎬',num:'40' },
+    {id:'tw_41', n:'八大戲劇',      ico:'🎭',num:'41' },
+    {id:'tw_43', n:'緯來戲劇',      ico:'🎞',num:'43' },
+    {id:'tw_61', n:'衛視電影',      ico:'🎥',num:'61' },
+    {id:'tw_62', n:'東森電影',      ico:'🎬',num:'62' },
+    {id:'tw_63', n:'緯來電影',      ico:'🎞',num:'63' },
+    {id:'tw_65', n:'HBO HD',        ico:'⭐',num:'65' },
+    {id:'tw_66', n:'東森洋片',      ico:'🎥',num:'66' },
+    {id:'tw_67', n:'壹電影',        ico:'🎬',num:'67' },
+    {id:'tw_68', n:'好萊塢電影',    ico:'🎭',num:'68' },
+    {id:'tw_69', n:'FOX MOVIES',    ico:'🦊',num:'69' },
+    {id:'tw_71', n:'CineMAX',       ico:'🎞',num:'71' },
+    {id:'tw_79', n:'FOX',           ico:'🦊',num:'79' },
+    {id:'tw_80', n:'靖天映畫',      ico:'🎬',num:'80' },
+    {id:'tw_81', n:'靖洋戲劇',      ico:'🎭',num:'81' },
+    {id:'tw_87', n:'EYE戲劇',       ico:'👁',num:'87' },
+    {id:'tw_88', n:'三立戲劇',      ico:'🎬',num:'88' },
+    {id:'tw_93', n:'FOX ACTION',    ico:'💥',num:'93' },
+    {id:'tw_100',n:'霹靂臺灣',      ico:'⚡',num:'100'},
+    {id:'tw_119',n:'靖天電影',      ico:'🎬',num:'119'},
+    {id:'tw_125',n:'美亞電影',      ico:'🎥',num:'125'},
+    {id:'tw_149',n:'民視影劇',      ico:'📺',num:'149'},
+    {id:'tw_168',n:'FOX CRIME',     ico:'🔍',num:'168'},
+    {id:'tw_187',n:'FOX Family',    ico:'👨‍👩‍👧',num:'187'},
+    {id:'tw_188',n:'HBO Signature', ico:'✍️',num:'188'},
+    {id:'tw_190',n:'HBO Hits',      ico:'🔥',num:'190'},
+    {id:'tw_191',n:'采昌影劇',      ico:'🎞',num:'191'},
+    {id:'tw_192',n:'影迷電影',      ico:'🎥',num:'192'},
+    {id:'tw_193',n:'龍華戲劇',      ico:'🐉',num:'193'},
+    {id:'tw_194',n:'龍華動畫',      ico:'🐉',num:'194'},
+    {id:'tw_195',n:'龍華偶像',      ico:'🐉',num:'195'},
+    {id:'tw_196',n:'龍華電影',      ico:'🐉',num:'196'},
+    {id:'tw_197',n:'龍華日韓',      ico:'🐉',num:'197'},
+    {id:'tw_198',n:'龍華經典',      ico:'🐉',num:'198'},
+    {id:'tw_199',n:'龍翔時代',      ico:'🐉',num:'199'},
+    {id:'tw_200',n:'AXN臺灣',       ico:'⚡',num:'200'},
+    {id:'tw_202',n:'華納電影',      ico:'🎬',num:'202'},
+    {id:'tw_203',n:'天映經典',      ico:'🎞',num:'203'},
+    {id:'tw_221',n:'金光布袋戲',    ico:'🤺',num:'221'},
+    {id:'tw_223',n:'星衛電影',      ico:'⭐',num:'223'},
+    {id:'tw_224',n:'公視戲劇',      ico:'📚',num:'224'},
+    {id:'tw_225',n:'靖天戲劇',      ico:'🎭',num:'225'},
+    {id:'tw_226',n:'衛視西片',      ico:'🎥',num:'226'},
+    {id:'tw_303',n:'靖天綜合',      ico:'📺',num:'303'},
+    {id:'tw_304',n:'靖天娛樂',      ico:'🎊',num:'304'},
+    {id:'tw_308',n:'中視經典',      ico:'🎬',num:'308'},
+    {id:'tw_441',n:'龍華洋片',      ico:'🐉',num:'441'},
+    {id:'tw_444',n:'Trill恐怖電影', ico:'👻',num:'444'},
+    {id:'tw_492',n:'法國時裝',      ico:'🇫🇷',num:'492'},
+    {id:'tw_497',n:'MOMO追劇',      ico:'📺',num:'497'},
+    {id:'tw_2066',n:'AXN亞洲',      ico:'⚡',num:'2066'},
+    {id:'tw_121',n:'公視3臺',       ico:'📚',num:'121'},
+    // ── 體育 ──────────────────────────────────
+    {id:'tw_72', n:'緯來體育',      ico:'⚽',num:'72' },
+    {id:'tw_75', n:'Eleven Sports1',ico:'⚽',num:'75' },
+    {id:'tw_76', n:'Eleven Sports2',ico:'⚽',num:'76' },
+    {id:'tw_104',n:'Z頻道',         ico:'🎮',num:'104'},
+    {id:'tw_142',n:'ELTA體育1',     ico:'🏆',num:'142'},
+    {id:'tw_143',n:'ELTA體育2',     ico:'🏅',num:'143'},
+    {id:'tw_144',n:'ELTA體育3',     ico:'🥇',num:'144'},
+    {id:'tw_209',n:'博斯運動1',     ico:'⚽',num:'209'},
+    {id:'tw_210',n:'博斯運動2',     ico:'🏀',num:'210'},
+    {id:'tw_237',n:'博斯無限',      ico:'🏟',num:'237'},
+    {id:'tw_238',n:'博斯無限2',     ico:'🏟',num:'238'},
+    {id:'tw_519',n:'Eleven Sports+',ico:'⚽',num:'519'},
+    // ── 自然/旅遊/美食 ─────────────────────────
+    {id:'tw_148',n:'民視旅遊',      ico:'✈️',num:'148'},
+    {id:'tw_169',n:'曼迪日本',      ico:'🇯🇵',num:'169'},
+    {id:'tw_204',n:'探索亞洲',      ico:'🌏',num:'204'},
+    {id:'tw_205',n:'探索科學',      ico:'🔬',num:'205'},
+    {id:'tw_230',n:'國家人文',      ico:'🏛',num:'230'},
+    {id:'tw_232',n:'國家地理悠人',  ico:'🗺',num:'232'},
+    {id:'tw_251',n:'國家野生',      ico:'🐆',num:'251'},
+    {id:'tw_256',n:'探索EVE',       ico:'🌿',num:'256'},
+    {id:'tw_261',n:'視納華仁紀實',  ico:'📽',num:'261'},
+    {id:'tw_265',n:'靖天國際',      ico:'🌐',num:'265'},
+    {id:'tw_266',n:'靖天育樂',      ico:'🎡',num:'266'},
+    {id:'tw_267',n:'靖天日本',      ico:'🇯🇵',num:'267'},
+    {id:'tw_268',n:'靖天歡樂',      ico:'😊',num:'268'},
+    {id:'tw_275',n:'美食星球',      ico:'🍽',num:'275'},
+    {id:'tw_276',n:'亞洲美食AFN',   ico:'🍜',num:'276'},
+    {id:'tw_278',n:'亞洲旅遊',      ico:'✈️',num:'278'},
+    {id:'tw_412',n:'EYE旅遊',       ico:'👁',num:'412'},
+    {id:'tw_435',n:'探索動力DMAX',  ico:'🚗',num:'435'},
+    // ── 兒童(更多) ─────────────────────────────
+    {id:'tw_170',n:'靖洋卡通',      ico:'🎪',num:'170'},
+    {id:'tw_171',n:'尼克兒童',      ico:'🧒',num:'171'},
+    {id:'tw_175',n:'靖天卡通',      ico:'🎠',num:'175'},
+    {id:'tw_178',n:'ELTV生活英語',  ico:'🔤',num:'178'},
+    {id:'tw_229',n:'Baby TV',       ico:'👶',num:'229'},
+    {id:'tw_111',n:'大愛一臺',      ico:'❤️',num:'111'},
+    // ── 購物 ──────────────────────────────────
+    {id:'tw_34', n:'東森購物2',     ico:'🛍',num:'34' },
+    {id:'tw_47', n:'東森購物1',     ico:'🛍',num:'47' },
+    {id:'tw_471',n:'誠心電視',      ico:'📺',num:'471'},
+    {id:'tw_472',n:'美好購物1',     ico:'🛒',num:'472'},
+    {id:'tw_473',n:'美好購物2',     ico:'🛒',num:'473'},
+    {id:'tw_482',n:'東森購物3',     ico:'🛍',num:'482'},
+    {id:'tw_483',n:'MOMO購物1',     ico:'🛒',num:'483'},
+    {id:'tw_484',n:'MOMO購物2',     ico:'🛒',num:'484'},
   ],
   hk:[
     {id:'hk01',n:'TVB翡翠台',  ico:'💎',num:'201'},
@@ -937,39 +1122,66 @@ function buildEPG(rid){
   });
 
   // Fetch TVMaze for US
-  if(rid==='us') fetchTVMaze();
+  if(rid==='us') fetchTVMaze('US');
+  if(rid==='tw') fetchTVMaze('TW');
 }
 
 // ═══ TVMAZE INTEGRATION ═══════════════════════════════════
-async function fetchTVMaze(){
+// TVMaze network → channel ID for Taiwan
+const TVMAZE_MAP_TW = {
+  'FTV':            'tw_6',
+  'TTV':            'tw_8',
+  'CTV':            'tw_10',
+  'CTS':            'tw_12',
+  'PTS':            'tw_13',
+  'SET':            'tw_29',
+  'SET TV':         'tw_30',
+  'TVBS':           'tw_54',
+  'TVBS News':      'tw_55',
+  'TVBS-G':         'tw_42',
+  'EBC':            'tw_32',
+  'EBC Yoyo':       'tw_25',
+  'CTi TV':         'tw_36',
+  'CTi News':       'tw_52',
+  'Sanlih E-Television': 'tw_29',
+  'Formosa TV':     'tw_6',
+  'Taiwan Television': 'tw_8',
+  'China Television': 'tw_10',
+  'Public Television Service': 'tw_13',
+};
+
+async function fetchTVMaze(country='US'){
   try{
     const today=new Date().toISOString().split('T')[0];
-    const res=await fetch(`https://api.tvmaze.com/schedule?country=US&date=${today}`);
+    const res=await fetch(`https://api.tvmaze.com/schedule?country=${country}&date=${today}`);
     if(!res.ok)return;
     const data=await res.json();
-    applyTVMazeData(data);
+    applyTVMazeData(data, country);
   }catch(e){
     console.warn('TVMaze fetch failed:',e);
   }
 }
 
-function applyTVMazeData(items){
-  const channels=CHANNELS['us'];
+function applyTVMazeData(items, country='US'){
+  const rid = country==='TW' ? 'tw' : 'us';
+  const map = country==='TW' ? TVMAZE_MAP_TW : TVMAZE_MAP;
+  const channels=CHANNELS[rid];
   // Group items by channel
   const byChIdx={};
 
   items.forEach(item=>{
     const netName=item.show?.network?.name||item.show?.webChannel?.name||'';
-    const chId=TVMAZE_MAP[netName];
+    const chId=map[netName];
     if(!chId)return;
     const chIdx=channels.findIndex(c=>c.id===chId);
     if(chIdx<0)return;
 
-    // Parse airstamp to local US time using our selected offset
+    // Convert airstamp to local time of the region
+    const tzOff = rid==='us' ? usTzOff : REGIONS[rid].off;
     let gridMin;
     try{
       const utcMs=new Date(item.airstamp).getTime();
-      const localMs=utcMs+usTzOff*3600000;
+      const localMs=utcMs+tzOff*3600000;
       const d=new Date(localMs);
       const h=d.getUTCHours(), m=d.getUTCMinutes();
       gridMin=h*60+m-GRID_S*60;
@@ -1030,7 +1242,7 @@ function applyTVMazeData(items){
           // Update sidebar current program name
           const chCell=document.querySelector(`.ch-cell[data-idx="${chIdx}"]`);
           if(chCell){
-            const nowRelMin=localNow('us').totalMin-GRID_S*60;
+            const nowRelMin=localNow(rid).totalMin-GRID_S*60;
             if(prog.gridMin<=nowRelMin&&prog.gridMin+prog.dur>nowRelMin){
               const np=chCell.querySelector('.ch-np');
               if(np) np.textContent=prog.name;
