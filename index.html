@@ -1185,7 +1185,7 @@ function buildEPG(rid){
 
   // Fetch live program data
   if(rid==='us') fetchAllUSData();
-  if(rid==='tw') fetchTVMaze('TW');
+  if(rid==='tw') fetchTWData();
 }
 
 // ═══ TVMAZE INTEGRATION ═══════════════════════════════════
@@ -1211,6 +1211,141 @@ const TVMAZE_MAP_TW = {
   'China Television': 'tw_10',
   'Public Television Service': 'tw_13',
 };
+
+// ═══ TVKING.FUNORANGE.COM.TW INTEGRATION (Taiwan) ════════════════
+// TvGo channel id → our tw_* channel id
+const TW_TVGO = {
+  18:'tw_6',  15:'tw_8',  9:'tw_10', 31:'tw_12', 12:'tw_13',
+  1:'tw_28',  2:'tw_27',  3:'tw_118', 60:'tw_44', 4:'tw_150',
+  5:'tw_29',  6:'tw_30',  7:'tw_39',  8:'tw_36',
+  16:'tw_150',19:'tw_151',20:'tw_152',
+  22:'tw_17', 23:'tw_32', 24:'tw_37', 27:'tw_16', 30:'tw_78',
+  34:'tw_33', 35:'tw_117',42:'tw_26', 43:'tw_70', 44:'tw_77',
+  45:'tw_83', 51:'tw_45', 54:'tw_54', 55:'tw_42',
+  56:'tw_56', 14:'tw_158',
+};
+
+const TWTVGO_CACHE = {};
+
+function _parseTWSchedule(html){
+  const today=new Date().toISOString().split('T')[0];
+  const idx=html.indexOf(`"date":"${today}"`);
+  if(idx<0)return[];
+  const chunk=html.substring(idx);
+  const plIdx=chunk.indexOf('"programList":[');
+  if(plIdx<0)return[];
+  // Bracket-match to extract the array
+  let depth=0,start=-1,end=0;
+  for(let i=plIdx;i<chunk.length;i++){
+    const c=chunk[i];
+    if(c==='['){if(start<0)start=i;depth++;}
+    else if(c===']'){depth--;if(depth===0){end=i;break;}}
+  }
+  if(start<0||end===0)return[];
+  try{
+    const arr=JSON.parse(chunk.substring(start,end+1));
+    return arr.filter(p=>p.timeS&&p.timeE&&p.program&&p.program!=='ads')
+              .map(p=>({
+                name:p.program,
+                gridMin:_twTimeGrid(p.timeS),
+                endMin: _twTimeGrid(p.timeE),
+              }));
+  }catch{return[];}
+}
+
+function _twTimeGrid(t){
+  const parts=t.split(':');
+  return parseInt(parts[0])*60+parseInt(parts[1])-GRID_S*60;
+}
+
+function _applyTWProgs(chIdx,progs){
+  const row=document.querySelector(`.prog-row[data-ch-idx="${chIdx}"]`);
+  if(!row)return;
+  const pbs=Array.from(row.querySelectorAll('.pb'));
+  progs.forEach(prog=>{
+    const gridMin=prog.gridMin;
+    if(gridMin<0||gridMin>=(GRID_E-GRID_S)*60)return;
+    let dur=prog.endMin-gridMin;
+    if(dur<=0)dur+=24*60;
+    for(const pb of pbs){
+      const pbStart=parseInt(pb.dataset.start||0);
+      const pbEnd=pbStart+parseFloat(pb.style.width||0)/MIN_PX;
+      if(gridMin>=pbStart&&gridMin<pbEnd){
+        const sh=pad((GRID_S+Math.floor(gridMin/60))%24),sm2=pad(gridMin%60);
+        const endMin=gridMin+dur;
+        const eh=pad((GRID_S+Math.floor(endMin/60))%24),em=pad(endMin%60);
+        pb.classList.add('verified');
+        pb.querySelector('.pb-title').textContent=prog.name;
+        pb.querySelector('.pb-time').textContent=`${sh}:${sm2}–${eh}:${em}`;
+        if(!pb.querySelector('.verified-badge')){
+          const b=document.createElement('div');
+          b.className='verified-badge';b.textContent='✓ LIVE DATA';pb.appendChild(b);
+        }
+        const chCell=document.querySelector(`.ch-cell[data-idx="${chIdx}"]`);
+        if(chCell){
+          const nowRel=localNow('tw').totalMin-GRID_S*60;
+          if(gridMin<=nowRel&&gridMin+dur>nowRel){
+            const np=chCell.querySelector('.ch-np');
+            if(np)np.textContent=prog.name;
+          }
+        }
+        break;
+      }
+    }
+  });
+}
+
+async function _fetchTWChannel(tvgoId){
+  if(TWTVGO_CACHE[tvgoId])return TWTVGO_CACHE[tvgoId];
+  const url=encodeURIComponent(`https://tvking.funorange.com.tw/channel/${tvgoId}`);
+  let html=null;
+  try{
+    const r=await fetch(`https://corsproxy.io/?url=${url}`,{signal:AbortSignal.timeout(9000)});
+    if(r.ok)html=await r.text();
+  }catch(e){}
+  if(!html){
+    try{
+      const r=await fetch(`https://api.allorigins.win/get?url=${url}`,{signal:AbortSignal.timeout(9000)});
+      if(r.ok){const j=await r.json();html=j.contents;}
+    }catch(e){}
+  }
+  if(!html)throw new Error('proxy failed');
+  const progs=_parseTWSchedule(html);
+  TWTVGO_CACHE[tvgoId]=progs;
+  return progs;
+}
+
+async function fetchTWData(){
+  const channels=CHANNELS.tw;
+  // Build tvgoId → [chIdx] map
+  const idMap={};
+  Object.entries(TW_TVGO).forEach(([tvgoId,twId])=>{
+    const idx=channels.findIndex(c=>c.id===twId);
+    if(idx<0)return;
+    if(!idMap[tvgoId])idMap[tvgoId]=[];
+    idMap[tvgoId].push(idx);
+  });
+  const entries=Object.entries(idMap);
+  const BATCH=6;
+  let loaded=0;
+  const hdrSub=document.getElementById('hdrSub');
+  for(let i=0;i<entries.length;i+=BATCH){
+    const batch=entries.slice(i,i+BATCH);
+    await Promise.all(batch.map(async([tvgoId,indices])=>{
+      try{
+        const progs=await _fetchTWChannel(parseInt(tvgoId));
+        indices.forEach(idx=>_applyTWProgs(idx,progs));
+        loaded++;
+        if(hdrSub&&curRegion==='tw')
+          hdrSub.textContent=`載入節目資料中… ${loaded}/${entries.length}`;
+      }catch(e){
+        console.warn('twtvgo',tvgoId,e.message);
+      }
+    }));
+  }
+  if(hdrSub&&curRegion==='tw')
+    hdrSub.textContent=`當地時間 ${localTimeStr('tw')} · 節目資料已更新`;
+}
 
 // ═══ US-TV-GUIDE.COM INTEGRATION ══════════════════════════════════
 const US_SLUG = {
