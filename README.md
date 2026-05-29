@@ -6,6 +6,7 @@ A dark-mode TV guide web app with a classic EPG grid layout, supporting 8 region
 
 - **EPG Grid Layout** — Horizontal time-slot grid (TVGuide.com style), channel list fixed on the left
 - **8 Regions** — 🇹🇼 Taiwan · 🇭🇰 Hong Kong · 🇨🇳 China · 🇺🇸 USA · 🇯🇵 Japan · 🇬🇧 UK · 🇰🇷 Korea · 🇹🇭 Thailand
+- **Flag selector** — Switch regions from the home page or directly inside the EPG header
 - **62 US Channels** — Full US channel list (CNN, Fox News, HBO, Discovery, ESPN, and more)
 - **Live indicator** — Red "NOW" line marks the current time; live programs are highlighted
 - **Program details** — Click any program block to see title, time, duration, and description

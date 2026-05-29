@@ -53,6 +53,42 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 .clock { margin-left:auto; text-align:right; }
 .clock .hm   { font-size:20px; font-weight:600; font-variant-numeric:tabular-nums; color:var(--text); }
 .clock .date { font-size:11px; color:var(--muted); }
+.region-select {
+  display:none; position:relative; flex-shrink:0;
+}
+.region-select.show { display:block; }
+.region-trigger {
+  height:38px; min-width:118px; display:flex; align-items:center; gap:8px;
+  border:1px solid var(--border); border-radius:8px; background:var(--card);
+  padding:4px 8px; color:var(--text); cursor:pointer; font-family:inherit;
+  box-shadow:0 1px 3px rgba(0,0,0,.05); transition:border-color .15s, background .15s;
+}
+.region-trigger:hover,
+.region-trigger.open { border-color:var(--accent); background:#fafaff; }
+.region-trigger .flag-mini {
+  width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center;
+  background:var(--card2); font-size:19px; line-height:1;
+}
+.region-trigger .label { display:flex; flex-direction:column; align-items:flex-start; min-width:0; }
+.region-trigger .name { font-size:12px; font-weight:800; white-space:nowrap; }
+.region-trigger .count { font-size:9px; color:var(--muted); white-space:nowrap; }
+.region-trigger .chev { margin-left:auto; font-size:11px; color:var(--muted); }
+.region-menu {
+  display:none; position:absolute; top:44px; left:0; z-index:80; width:220px;
+  background:var(--card); border:1px solid var(--border); border-radius:8px; padding:6px;
+  box-shadow:0 18px 44px rgba(20,20,45,.18);
+}
+.region-menu.open { display:grid; gap:4px; }
+.region-option {
+  width:100%; display:grid; grid-template-columns:30px 1fr auto; align-items:center; gap:8px;
+  padding:6px; border:0; border-radius:7px; background:transparent; color:var(--text);
+  cursor:pointer; text-align:left; font-family:inherit;
+}
+.region-option:hover,
+.region-option.active { background:var(--accent2); }
+.region-option .flag-mini { font-size:18px; }
+.region-option .name { font-size:12px; font-weight:700; }
+.region-option .count { font-size:10px; color:var(--muted); }
 
 /* ─── APP SHELL ───────────────────────────────────────── */
 #app { height:calc(100vh - var(--hdr-h)); display:flex; flex-direction:column; overflow:hidden; }
@@ -60,12 +96,28 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 /* ─── HOME PAGE ───────────────────────────────────────── */
 #pageHome { overflow-y:auto; padding:20px; display:none; }
 #pageHome.active { display:block; }
+.home-hero {
+  display:grid; grid-template-columns:minmax(260px,1fr) auto; gap:24px; align-items:center;
+  padding:10px 0 24px;
+}
+.home-title { font-size:clamp(28px,4vw,44px); line-height:1.12; font-weight:900; color:var(--text); }
+.home-sub { margin-top:10px; font-size:14px; line-height:1.6; color:var(--muted); font-weight:600; }
+.flag-dock {
+  display:grid; grid-template-columns:repeat(4,46px); gap:8px; padding:10px;
+  background:rgba(255,255,255,.72); border:1px solid var(--border); border-radius:8px;
+  box-shadow:0 14px 36px rgba(20,20,45,.08);
+}
+.flag-dock button {
+  width:46px; height:36px; border:1px solid var(--border); border-radius:8px;
+  background:var(--card); font-size:22px; cursor:pointer; transition:transform .15s, border-color .15s;
+}
+.flag-dock button:hover { transform:translateY(-2px); border-color:var(--accent); }
 .home-heading { font-size:12px; color:var(--muted); font-weight:700; letter-spacing:.8px;
   text-transform:uppercase; margin-bottom:14px; }
 .region-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
 @media(min-width:520px){ .region-grid { grid-template-columns:repeat(4,1fr); } }
 .region-card {
-  background:var(--card); border:1px solid var(--border); border-radius:16px;
+  background:var(--card); border:1px solid var(--border); border-radius:8px;
   padding:26px 12px 18px; display:flex; flex-direction:column;
   align-items:center; gap:10px; cursor:pointer;
   box-shadow:0 1px 4px rgba(0,0,0,.06);
@@ -216,6 +268,7 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 }
 
 .prog-row { height:var(--row-h); display:flex; border-bottom:1px solid var(--border); }
+.prog-row.real-row { position:relative; }
 
 /* Program block */
 .pb {
@@ -235,6 +288,11 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 .pb.verified.past   { opacity:.5; }
 .pb.verified .pb-title { color:#006b28; font-weight:700; }
 .pb.verified .pb-time  { color:#339955; }
+.pb.verified.real-fit {
+  position:absolute; top:0; bottom:0; height:auto; z-index:3;
+  border-left:1px solid rgba(0,160,60,.18);
+  box-shadow:inset 0 0 0 1px rgba(0,160,60,.08);
+}
 .verified-badge { display:none; }
 /* NOW badge on the currently-airing program */
 .now-badge {
@@ -257,7 +315,11 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 
 .pb-title { font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text); }
 .pb.live .pb-title { color:var(--accent); }
-.pb-time  { font-size:10px; color:var(--muted); margin-top:3px; font-variant-numeric:tabular-nums; }
+.pb-time  { font-size:10px; color:var(--muted); margin-top:3px; font-variant-numeric:tabular-nums;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pb.tight { padding-left:6px; padding-right:6px; }
+.pb.tight .pb-title { display:none; }
+.pb.tight .pb-time { margin-top:0; font-size:9px; }
 .pb-bar   { position:absolute; bottom:0; left:0; height:2px; background:var(--accent); }
 
 /* Loading overlay on prog-row */
@@ -299,6 +361,110 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 }
 .dp-close:hover { color:var(--text); }
 
+/* ─── Original design file visual pass ─────────────────── */
+:root {
+  --bg:#f4f5fa;
+  --sidebar:#f6f7fc;
+  --card:#ffffff;
+  --card2:#eef1fb;
+  --border:#e5e8f4;
+  --accent:#5361d8;
+  --accent2:rgba(83,97,216,.12);
+  --text:#1b1e28;
+  --muted:#7c8298;
+  --now-clr:#5361d8;
+  --verified-bg:#f2f5ff;
+  --verified-top:#eef1fb;
+  --ch-w:210px;
+  --row-h:78px;
+  --hdr-h:72px;
+  --time-h:48px;
+}
+#hdr {
+  padding:0 28px;
+  gap:14px;
+  background:rgba(255,255,255,.96);
+  border-bottom:1px solid #eceef6;
+}
+#backBtn {
+  width:38px; height:38px; border-radius:8px;
+  border:1px solid #edf0f7; background:#f8f9fd;
+  transition:background .15s, transform .15s;
+}
+#backBtn:hover { background:#eef1fb; transform:translateX(-2px); }
+#hdrTitle { font-size:22px; font-weight:900; letter-spacing:0; }
+#hdrSub { font-size:12px; font-weight:600; margin-top:3px; }
+.region-trigger {
+  height:42px; min-width:130px; border-color:#edf0f7;
+  background:#f8f9fd; box-shadow:0 1px 3px rgba(20,24,60,.04);
+}
+.region-trigger .flag-mini { width:30px; height:30px; background:#fff; }
+.cat-bar {
+  padding:14px 24px;
+  gap:10px;
+  background:#fff;
+  border-bottom:1px solid #eceef6;
+}
+.cat-pill {
+  font-size:13px; font-weight:800;
+  padding:8px 16px;
+  border-radius:999px;
+  border-color:#edf0f7;
+  background:#f7f8fd;
+}
+.time-hdr { background:#fafbff; border-bottom:1px solid #e5e8f4; }
+.time-ch-gap { background:#fafbff; border-right:1px solid #e5e8f4; }
+.ts { font-size:12px; padding-left:12px; color:#858aa4; border-right:1px solid #e5e8f4; }
+.ts.h0 { font-size:14px; font-weight:900; color:#171a27; }
+.ch-sidebar { background:#fafbff; border-right:1px solid #e5e8f4; }
+.ch-cell {
+  gap:12px;
+  padding:0 16px;
+  border-bottom:1px solid #e5e8f4;
+}
+.ch-cell:hover { background:#f3f5fb; }
+.ch-cell.sel { background:#eef2ff; border-left:4px solid var(--accent); padding-left:12px; }
+.ch-ico {
+  width:42px; height:42px; border-radius:8px;
+  border:1px solid #edf0f7;
+}
+.ch-n { font-size:14px; font-weight:900; }
+.ch-np { font-size:11px; font-weight:600; margin-top:4px; }
+.prog-row { border-bottom:1px solid #e5e8f4; }
+.pb {
+  padding:14px 14px;
+  border-right:1px solid #e5e8f4;
+  background:#f6f8ff;
+}
+.pb:hover { background:#eef2ff; }
+.pb-title { font-size:13px; font-weight:800; color:#171a27; }
+.pb-time { font-size:11px; margin-top:5px; color:#707891; }
+.pb.live {
+  background:#dfe5ff;
+  border:2px solid var(--accent);
+  border-radius:8px;
+  padding-top:12px;
+}
+.pb.verified {
+  background:#f2f5ff !important;
+  border-top:1px solid #eef1fb;
+  padding-top:14px;
+}
+.pb.verified:hover { background:#e8edff !important; }
+.pb.verified .pb-title { color:#171a27; font-weight:900; }
+.pb.verified .pb-time { color:#707891; }
+.pb.verified.real-fit {
+  border-left:1px solid #edf0f8;
+  box-shadow:inset 0 0 0 1px rgba(83,97,216,.05);
+}
+.now-badge {
+  top:6px; right:6px;
+  background:var(--accent);
+  border-radius:5px;
+}
+.pb.tight { padding:8px 6px; }
+.pb.tight .pb-time { font-size:9px; margin-top:0; }
+
 /* ─── SCROLLBAR ───────────────────────────────────────── */
 .prog-scroll::-webkit-scrollbar { width:6px; height:6px; }
 .prog-scroll::-webkit-scrollbar-track { background:var(--card2); }
@@ -326,13 +492,22 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
   #backBtn{ width:30px; height:30px; font-size:18px; }
   #hdrTitle{ font-size:15px; }
   #hdrSub{ font-size:9px; }
+  .region-trigger{ min-width:92px; height:34px; padding:3px 6px; }
+  .region-trigger .count{ display:none; }
+  .region-trigger .flag-mini{ width:26px; height:26px; }
+  .region-menu{ left:-42px; width:204px; }
   .clock .hm{ font-size:15px; }
   .clock .date{ font-size:9px; }
 
   /* Home */
   #pageHome{ padding:14px; }
+  .home-hero{ grid-template-columns:1fr; gap:16px; padding:6px 0 20px; }
+  .home-title{ font-size:28px; }
+  .home-sub{ font-size:13px; }
+  .flag-dock{ grid-template-columns:repeat(4,1fr); }
+  .flag-dock button{ width:100%; }
   .region-grid{ grid-template-columns:repeat(2,1fr); gap:10px; }
-  .region-card{ padding:20px 8px 14px; border-radius:14px; }
+  .region-card{ padding:20px 8px 14px; border-radius:8px; }
   .flag{ font-size:40px; }
   .region-name{ font-size:13px; }
 
@@ -375,6 +550,17 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 <!-- HEADER -->
 <header id="hdr">
   <button id="backBtn" onclick="goHome()">‹</button>
+  <div class="region-select" id="regionSelect">
+    <button class="region-trigger" id="regionTrigger" onclick="toggleRegionMenu(event)" aria-haspopup="listbox" aria-expanded="false">
+      <span class="flag-mini" id="regionFlag">🇹🇼</span>
+      <span class="label">
+        <span class="name" id="regionName">台灣</span>
+        <span class="count" id="regionCount">186 個頻道</span>
+      </span>
+      <span class="chev">▾</span>
+    </button>
+    <div class="region-menu" id="regionMenu" role="listbox"></div>
+  </div>
   <div class="hdr-info">
     <div id="hdrTitle">📺 電視節目表</div>
     <div id="hdrSub">選擇地區查看節目</div>
@@ -389,6 +575,22 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 
   <!-- HOME PAGE -->
   <div id="pageHome" class="active">
+    <section class="home-hero">
+      <div>
+        <div class="home-title">用旗幟快速切換各地節目表</div>
+        <div class="home-sub">進入節目表後也能直接在左上角切換地區，頻道台標維持原本資料來源。</div>
+      </div>
+      <div class="flag-dock" aria-label="快速選擇地區">
+        <button onclick="openRegion('tw')" title="台灣">🇹🇼</button>
+        <button onclick="openRegion('hk')" title="香港">🇭🇰</button>
+        <button onclick="openRegion('cn')" title="中國大陸">🇨🇳</button>
+        <button onclick="openRegion('us')" title="美國">🇺🇸</button>
+        <button onclick="openRegion('jp')" title="日本">🇯🇵</button>
+        <button onclick="openRegion('uk')" title="英國">🇬🇧</button>
+        <button onclick="openRegion('kr')" title="韓國">🇰🇷</button>
+        <button onclick="openRegion('th')" title="泰國">🇹🇭</button>
+      </div>
+    </section>
     <p class="home-heading">選擇地區</p>
     <div class="region-grid">
       <div class="region-card" onclick="openRegion('tw')">
@@ -1229,9 +1431,60 @@ function channelLogo(ch,rid){
 }
 
 // ═══ NAVIGATION ═══════════════════════════════════════════
+function regionCount(rid){
+  return (CHANNELS[rid]||[]).length;
+}
+
+function renderRegionMenu(){
+  const menu=document.getElementById('regionMenu');
+  if(!menu)return;
+  menu.innerHTML=Object.entries(REGIONS).map(([rid,r])=>`
+    <button class="region-option${rid===curRegion?' active':''}" onclick="pickRegion('${rid}')" role="option" aria-selected="${rid===curRegion}">
+      <span class="flag-mini">${r.flag}</span>
+      <span class="name">${r.name}</span>
+      <span class="count">${regionCount(rid)}</span>
+    </button>
+  `).join('');
+}
+
+function updateRegionSelector(rid){
+  const r=REGIONS[rid];
+  if(!r)return;
+  document.getElementById('regionSelect')?.classList.add('show');
+  document.getElementById('regionFlag').textContent=r.flag;
+  document.getElementById('regionName').textContent=r.name;
+  document.getElementById('regionCount').textContent=`${regionCount(rid)} 個頻道`;
+  renderRegionMenu();
+}
+
+function toggleRegionMenu(e){
+  e.stopPropagation();
+  const menu=document.getElementById('regionMenu');
+  const trigger=document.getElementById('regionTrigger');
+  const open=!menu.classList.contains('open');
+  menu.classList.toggle('open',open);
+  trigger.classList.toggle('open',open);
+  trigger.setAttribute('aria-expanded',open?'true':'false');
+}
+
+function closeRegionMenu(){
+  document.getElementById('regionMenu')?.classList.remove('open');
+  const trigger=document.getElementById('regionTrigger');
+  trigger?.classList.remove('open');
+  trigger?.setAttribute('aria-expanded','false');
+}
+
+function pickRegion(rid){
+  closeRegionMenu();
+  openRegion(rid);
+}
+
+document.addEventListener('click',closeRegionMenu);
+
 function goHome(){
   curRegion=null;
   document.getElementById('backBtn').classList.remove('show');
+  document.getElementById('regionSelect')?.classList.remove('show');
   document.getElementById('hdrTitle').textContent='📺 電視節目表';
   document.getElementById('hdrSub').textContent='選擇地區查看節目';
   document.getElementById('pageHome').classList.add('active');
@@ -1245,8 +1498,9 @@ function openRegion(rid){
   curCat='all';
   const r=REGIONS[rid];
   document.getElementById('backBtn').classList.add('show');
+  updateRegionSelector(rid);
   const tzLabel=rid==='us'?` (${usTzLabel})`:'';
-  document.getElementById('hdrTitle').textContent=`${r.flag} ${r.name}`;
+  document.getElementById('hdrTitle').textContent=r.name;
   document.getElementById('hdrSub').textContent=`當地時間 ${localTimeStr(rid)}${tzLabel}`;
   document.getElementById('pageHome').classList.remove('active');
   document.getElementById('pageEPG').classList.add('active');
@@ -1317,7 +1571,7 @@ function buildEPG(rid){
   channels.forEach((ch,i)=>{
     const sched=buildSchedule(ch.id,rid);
     const row=document.createElement('div');
-    row.className='prog-row'+(realOnly?' nodata':''); row.dataset.chIdx=i;
+    row.className='prog-row'+(realOnly?' nodata real-row':''); row.dataset.chIdx=i;
     const nowRelMin=nowMin-GRID_S*60;
 
     sched.forEach((prog,pi)=>{
@@ -1502,6 +1756,66 @@ function _twTimeGrid(t){
   return parseInt(parts[0])*60+parseInt(parts[1])-GRID_S*60;
 }
 
+function _fitVerifiedBlock(sourcePb,rid,chIdx,prog){
+  const row=document.querySelector(`.prog-row[data-ch-idx="${chIdx}"]`);
+  if(!row||!sourcePb)return;
+  const channels=CHANNELS[rid]||[];
+  const ch=channels[chIdx];
+  if(!ch)return;
+  const gridMin=prog.gridMin;
+  let dur=prog.dur||60;
+  if(dur<=0)dur+=24*60;
+  const maxDur=(GRID_E-GRID_S)*60-gridMin;
+  dur=Math.max(5,Math.min(dur,maxDur));
+  const nowRel=localNow(rid).totalMin-GRID_S*60;
+  const isLive=gridMin<=nowRel&&gridMin+dur>nowRel;
+  const isPast=gridMin+dur<=nowRel;
+  const endMin=gridMin+dur;
+  const sh=pad((GRID_S+Math.floor(gridMin/60))%24),sm2=pad(gridMin%60);
+  const eh=pad((GRID_S+Math.floor(endMin/60))%24),em=pad(endMin%60);
+  const title=prog.name+(prog.epName&&prog.epName!==prog.name?` · ${prog.epName}`:'');
+  const realKey=`${rid}|${chIdx}|${gridMin}|${dur}|${title}`;
+  const existing=[...row.querySelectorAll('.pb.verified.real-fit')].find(el=>el.dataset.realKey===realKey);
+  if(existing)return;
+  const collides=[...row.querySelectorAll('.pb.verified.real-fit')].some(el=>{
+    const s=Number(el.dataset.start||0);
+    const e=s+Number(el.dataset.dur||0);
+    return Math.max(s,gridMin)<Math.min(e,endMin)-1;
+  });
+  if(collides)return;
+  const pb=document.createElement('div');
+
+  pb.className='pb verified real-fit'+(dur<35?' tight':'')+(isLive?' live':'')+(isPast?' past':'');
+  pb.style.left=(gridMin*MIN_PX)+'px';
+  pb.style.width=(dur*MIN_PX)+'px';
+  pb.style.position='absolute';
+  pb.style.top='0';
+  pb.style.bottom='0';
+  pb.dataset.chIdx=chIdx;
+  pb.dataset.start=gridMin;
+  pb.dataset.dur=dur;
+  pb.dataset.realKey=realKey;
+  pb.innerHTML=`<div class="pb-title">${title}</div><div class="pb-time">${sh}:${sm2}–${eh}:${em}</div>`;
+  if(isLive){
+    const pct=Math.min(100,Math.max(0,((nowRel-gridMin)/dur)*100));
+    const bar=document.createElement('div'); bar.className='pb-bar'; bar.style.width=pct+'%';
+    pb.appendChild(bar);
+    const nb=document.createElement('div'); nb.className='now-badge'; nb.textContent='NOW';
+    pb.appendChild(nb);
+  }
+  const badge=document.createElement('div');
+  badge.className='verified-badge'; badge.textContent='✓ LIVE DATA';
+  pb.appendChild(badge);
+  pb.onclick=(e)=>{
+    e.stopPropagation();
+    selectChannel(chIdx);
+    showDetailFromVerified(ch,{gridMin,dur,name:prog.name,epName:prog.epName||'',desc:prog.desc||DESCS.news,type:prog.type||'live'});
+    document.querySelectorAll('.pb.sel-prog').forEach(el=>el.classList.remove('sel-prog'));
+    pb.classList.add('sel-prog');
+  };
+  row.appendChild(pb);
+}
+
 function _applyTWProgs(chIdx,progs){
   const row=document.querySelector(`.prog-row[data-ch-idx="${chIdx}"]`);
   if(!row)return;
@@ -1515,16 +1829,7 @@ function _applyTWProgs(chIdx,progs){
       const pbStart=parseInt(pb.dataset.start||0);
       const pbEnd=pbStart+parseFloat(pb.style.width||0)/MIN_PX;
       if(gridMin>=pbStart&&gridMin<pbEnd){
-        const sh=pad((GRID_S+Math.floor(gridMin/60))%24),sm2=pad(gridMin%60);
-        const endMin=gridMin+dur;
-        const eh=pad((GRID_S+Math.floor(endMin/60))%24),em=pad(endMin%60);
-        pb.classList.add('verified');
-        pb.querySelector('.pb-title').textContent=prog.name;
-        pb.querySelector('.pb-time').textContent=`${sh}:${sm2}–${eh}:${em}`;
-        if(!pb.querySelector('.verified-badge')){
-          const b=document.createElement('div');
-          b.className='verified-badge';b.textContent='✓ LIVE DATA';pb.appendChild(b);
-        }
+        _fitVerifiedBlock(pb,'tw',chIdx,{...prog,dur});
         const chCell=document.querySelector(`.ch-cell[data-idx="${chIdx}"]`);
         if(chCell){
           const nowRel=localNow('tw').totalMin-GRID_S*60;
@@ -1683,16 +1988,7 @@ function _applyUSProgs(chIdx,progs){
       const pbStart=parseInt(pb.dataset.start||0);
       const pbEnd=pbStart+parseFloat(pb.style.width||0)/MIN_PX;
       if(gridMin>=pbStart&&gridMin<pbEnd){
-        const endMin=gridMin+prog.dur;
-        const sh=pad((GRID_S+Math.floor(gridMin/60))%24),sm2=pad(gridMin%60);
-        const eh=pad((GRID_S+Math.floor(endMin/60))%24),em=pad(endMin%60);
-        pb.classList.add('verified');
-        pb.querySelector('.pb-title').textContent=prog.name;
-        pb.querySelector('.pb-time').textContent=`${sh}:${sm2}–${eh}:${em}`;
-        if(!pb.querySelector('.verified-badge')){
-          const b=document.createElement('div');
-          b.className='verified-badge';b.textContent='✓ LIVE DATA';pb.appendChild(b);
-        }
+        _fitVerifiedBlock(pb,'us',chIdx,{...prog,gridMin});
         // Update sidebar now-playing
         const chCell=document.querySelector(`.ch-cell[data-idx="${chIdx}"]`);
         if(chCell){
@@ -1819,21 +2115,7 @@ function applyTVMazeData(items, country='US'){
         const pbEnd=pbStart+pbDur;
         // Overlap check: prog starts within this block
         if(prog.gridMin>=pbStart&&prog.gridMin<pbEnd){
-          const endMin=prog.gridMin+prog.dur;
-          const sh=pad((GRID_S+Math.floor(prog.gridMin/60))%24), sm=pad(prog.gridMin%60);
-          const eh=pad((GRID_S+Math.floor(endMin/60))%24),   em=pad(endMin%60);
-          const showName=prog.name+(prog.epName&&prog.epName!==prog.name?` · ${prog.epName}`:'');
-
-          pb.classList.add('verified');
-          pb.querySelector('.pb-title').textContent=showName;
-          pb.querySelector('.pb-time').textContent=`${sh}:${sm}–${eh}:${em}`;
-
-          // Add verified badge if not already there
-          if(!pb.querySelector('.verified-badge')){
-            const badge=document.createElement('div');
-            badge.className='verified-badge'; badge.textContent='✓ LIVE DATA';
-            pb.appendChild(badge);
-          }
+          _fitVerifiedBlock(pb,rid,chIdx,prog);
 
           // Update detail panel if this is currently selected
           if(pb.classList.contains('sel-prog')){
