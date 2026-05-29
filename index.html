@@ -1,704 +1,231 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>📺 電視節目表</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>電視節目表 — TV Guide</title>
 <style>
+/* ===== TV Guide — modern redesign (per design doc) ===== */
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --bg:       #f4f5fa;
-  --sidebar:  #e8e8f0;
-  --card:     #ffffff;
-  --card2:    #f0f0f8;
-  --border:   #d8d8e8;
-  --accent:   #5248d4;
-  --accent2:  rgba(82,72,212,.1);
-  --text:     #1a1a2e;
-  --muted:    #8080a8;
-  --live:     #007a35;
-  --now-clr:  #d92d20;
-  --verified-bg:   rgba(0, 160, 60, .12);
-  --verified-top:  #00a03c;
-  --ch-w:     175px;
-  --slot-w:   110px;
-  --row-h:    66px;
-  --hdr-h:    54px;
-  --time-h:   62px;
+  --accent: #4F5BD5; --radius: 16px;
+  --bg: #F4F5FA; --surface: #FFFFFF; --ink-1: #1B1E28; --ink-2: #6A7080;
+  --line: #E7E9F1; --logo-mono: #EEF0F6;
 }
+html, body { height: 100%; }
+body {
+  font-family: "Noto Sans TC", -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+  background: var(--bg); color: var(--ink-1);
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input { font-family: inherit; }
+.tvg-root { position: fixed; inset: 0; background: var(--bg); color: var(--ink-1);
+  display: flex; flex-direction: column; overflow: hidden; }
 
-html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--text);
-  font-family:-apple-system,'PingFang TC','Noto Sans TC',sans-serif; }
+/* ===== App bar ===== */
+.appbar { flex: none; display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 28px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.appbar-left { display: flex; align-items: center; gap: 14px; }
+.appbar-icon { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center;
+  background: var(--accent); color: #fff; box-shadow: 0 6px 16px -6px var(--accent); }
+.appbar-flag { font-size: 30px; line-height: 1; }
+.appbar-title { font-size: 21px; font-weight: 800; letter-spacing: -0.01em; }
+.appbar-sub { font-size: 12.5px; color: var(--ink-2); margin-top: 2px; font-weight: 500; }
+.appbar-right { text-align: right; }
+.clock { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+.datelabel { font-size: 12.5px; color: var(--ink-2); font-weight: 500; margin-top: 1px; }
+.backbtn { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center;
+  background: var(--bg); color: var(--ink-1); transition: background .15s, transform .15s; }
+.backbtn:hover { background: var(--line); transform: translateX(-2px); }
 
-/* ─── HEADER ──────────────────────────────────────────── */
-#hdr {
-  height:var(--hdr-h); display:flex; align-items:center; gap:10px;
-  padding:0 16px; background:rgba(242,242,247,.96);
-  backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
-  position:relative; z-index:30; flex-shrink:0;
-}
-#backBtn {
-  display:none; align-items:center; justify-content:center;
-  width:34px; height:34px; border-radius:50%;
-  border:1px solid var(--border); background:var(--card);
-  color:var(--text); font-size:20px; cursor:pointer; flex-shrink:0;
-  transition:background .15s;
-}
-#backBtn:hover { background:var(--card2); }
-#backBtn.show  { display:flex; }
-.hdr-info {}
-#hdrTitle { font-size:17px; font-weight:700; }
-#hdrSub   { font-size:11px; color:var(--muted); margin-top:1px; }
-.clock { margin-left:auto; text-align:right; }
-.clock .hm   { font-size:20px; font-weight:600; font-variant-numeric:tabular-nums; color:var(--text); }
-.clock .date { font-size:11px; color:var(--muted); }
-.region-select {
-  display:none; position:relative; flex-shrink:0;
-}
-.region-select.show { display:block; }
-.region-trigger {
-  height:38px; min-width:118px; display:flex; align-items:center; gap:8px;
-  border:1px solid var(--border); border-radius:8px; background:var(--card);
-  padding:4px 8px; color:var(--text); cursor:pointer; font-family:inherit;
-  box-shadow:0 1px 3px rgba(0,0,0,.05); transition:border-color .15s, background .15s;
-}
-.region-trigger:hover,
-.region-trigger.open { border-color:var(--accent); background:#fafaff; }
-.region-trigger .flag-mini {
-  width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center;
-  background:var(--card2); font-size:19px; line-height:1;
-}
-.region-trigger .label { display:flex; flex-direction:column; align-items:flex-start; min-width:0; }
-.region-trigger .name { font-size:12px; font-weight:800; white-space:nowrap; }
-.region-trigger .count { font-size:9px; color:var(--muted); white-space:nowrap; }
-.region-trigger .chev { margin-left:auto; font-size:11px; color:var(--muted); }
-.region-menu {
-  display:none; position:absolute; top:44px; left:0; z-index:80; width:220px;
-  background:var(--card); border:1px solid var(--border); border-radius:8px; padding:6px;
-  box-shadow:0 18px 44px rgba(20,20,45,.18);
-}
-.region-menu.open { display:grid; gap:4px; }
-.region-option {
-  width:100%; display:grid; grid-template-columns:30px 1fr auto; align-items:center; gap:8px;
-  padding:6px; border:0; border-radius:7px; background:transparent; color:var(--text);
-  cursor:pointer; text-align:left; font-family:inherit;
-}
-.region-option:hover,
-.region-option.active { background:var(--accent2); }
-.region-option .flag-mini { font-size:18px; }
-.region-option .name { font-size:12px; font-weight:700; }
-.region-option .count { font-size:10px; color:var(--muted); }
+/* ===== Region select ===== */
+.rs-root { display: flex; flex-direction: column; height: 100%; }
+.rs-main { flex: 1; overflow-y: auto; padding: 36px clamp(28px, 6vw, 90px) 60px; }
+.rs-sectionhead { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 22px; }
+.rs-eyebrow { font-size: 14px; font-weight: 800; letter-spacing: 0.04em; color: var(--ink-1); }
+.rs-hint { font-size: 13px; color: var(--ink-2); font-weight: 500; white-space: nowrap; }
+.rs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+@media (max-width: 1100px) { .rs-grid { grid-template-columns: repeat(2, 1fr); } }
+.rs-card { position: relative; text-align: left; display: flex; align-items: center; gap: 18px;
+  padding: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 20px;
+  transition: transform .18s cubic-bezier(.2,.7,.3,1), box-shadow .18s, border-color .18s; }
+.rs-card:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -22px rgba(20,24,50,.45);
+  border-color: color-mix(in oklab, var(--accent) 50%, var(--line)); }
+.rs-flagtile { flex: none; width: 64px; height: 64px; border-radius: 16px; display: grid;
+  place-items: center; font-size: 36px; line-height: 1; background: var(--bg); transition: background .18s; }
+.rs-card:hover .rs-flagtile { background: color-mix(in oklab, var(--accent) 12%, var(--bg)); }
+.rs-cardbody { display: flex; flex-direction: column; gap: 7px; flex: 1; }
+.rs-name { font-size: 19px; font-weight: 800; letter-spacing: -0.01em; }
+.rs-count { font-size: 12.5px; font-weight: 600; color: var(--ink-2); background: var(--bg);
+  align-self: flex-start; white-space: nowrap; padding: 3px 10px; border-radius: 999px; }
+.rs-go { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  color: var(--accent); background: color-mix(in oklab, var(--accent) 12%, transparent);
+  opacity: 0; transform: translateX(-6px); transition: opacity .18s, transform .18s; }
+.rs-card:hover .rs-go { opacity: 1; transform: translateX(0); }
 
-/* ─── APP SHELL ───────────────────────────────────────── */
-#app { height:calc(100vh - var(--hdr-h)); display:flex; flex-direction:column; overflow:hidden; }
+/* ===== EPG ===== */
+.epg { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.epg-filters { flex: none; display: flex; align-items: center; gap: 18px; padding: 14px 24px;
+  background: var(--surface); border-bottom: 1px solid var(--line); }
+.chips { display: flex; gap: 8px; flex: 1; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; border-radius: 999px;
+  font-size: 13.5px; font-weight: 600; color: var(--ink-2); transition: all .15s;
+  border: 1px solid transparent; white-space: nowrap; flex: none; background: var(--bg); }
+.chip:hover { background: var(--line); }
+.chip.is-active { background: var(--chip-accent, var(--accent)); color: #fff; }
+.chip.is-active .chip-count { background: rgba(255,255,255,.25); color: #fff; }
+.chip.is-active .chip-dot { background: rgba(255,255,255,.9); }
+.chip-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--chip-accent); flex: none; }
+.chip-count { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 999px;
+  background: var(--surface); color: var(--ink-2); }
+.searchbox { flex: none; display: flex; align-items: center; gap: 8px; width: 280px; padding: 9px 14px;
+  border-radius: 12px; background: var(--bg); color: var(--ink-2);
+  border: 1px solid transparent; transition: border-color .15s, background .15s; }
+.searchbox:focus-within { border-color: var(--accent); background: var(--surface); }
+.searchbox input { border: none; outline: none; background: none; flex: 1; font-size: 14px; color: var(--ink-1); }
+.searchbox input::placeholder { color: var(--ink-2); }
+.search-clear { color: var(--ink-2); font-size: 18px; line-height: 1; padding: 0 2px; }
 
-/* ─── HOME PAGE ───────────────────────────────────────── */
-#pageHome { overflow-y:auto; padding:20px; display:none; }
-#pageHome.active { display:block; }
-.home-hero {
-  display:grid; grid-template-columns:minmax(260px,1fr) auto; gap:24px; align-items:center;
-  padding:10px 0 24px;
-}
-.home-title { font-size:clamp(28px,4vw,44px); line-height:1.12; font-weight:900; color:var(--text); }
-.home-sub { margin-top:10px; font-size:14px; line-height:1.6; color:var(--muted); font-weight:600; }
-.flag-dock {
-  display:grid; grid-template-columns:repeat(4,46px); gap:8px; padding:10px;
-  background:rgba(255,255,255,.72); border:1px solid var(--border); border-radius:8px;
-  box-shadow:0 14px 36px rgba(20,20,45,.08);
-}
-.flag-dock button {
-  width:46px; height:36px; border:1px solid var(--border); border-radius:8px;
-  background:var(--card); font-size:22px; cursor:pointer; transition:transform .15s, border-color .15s;
-}
-.flag-dock button:hover { transform:translateY(-2px); border-color:var(--accent); }
-.home-heading { font-size:12px; color:var(--muted); font-weight:700; letter-spacing:.8px;
-  text-transform:uppercase; margin-bottom:14px; }
-.region-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
-@media(min-width:520px){ .region-grid { grid-template-columns:repeat(4,1fr); } }
-.region-card {
-  background:var(--card); border:1px solid var(--border); border-radius:8px;
-  padding:26px 12px 18px; display:flex; flex-direction:column;
-  align-items:center; gap:10px; cursor:pointer;
-  box-shadow:0 1px 4px rgba(0,0,0,.06);
-  transition:transform .15s, border-color .15s, box-shadow .15s;
-  user-select:none;
-}
-.region-card:hover  { transform:translateY(-3px); border-color:var(--accent); box-shadow:0 4px 16px rgba(82,72,212,.15); }
-.region-card:active { transform:scale(.97); }
-.flag { font-size:48px; line-height:1; }
-.region-name { font-size:14px; font-weight:600; color:var(--text); }
-.region-cnt  { font-size:11px; color:var(--muted); }
+.epg-board { flex: 1; min-height: 0; overflow: auto; position: relative; }
+.epg-inner { position: relative; width: calc(var(--rail-w) + var(--total-w)); min-height: 100%; }
+.epg-axis { position: sticky; top: 0; z-index: 30; display: flex; height: 46px;
+  background: color-mix(in oklab, var(--surface) 92%, transparent); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line); }
+.axis-corner { position: sticky; left: 0; z-index: 31; flex: none; width: var(--rail-w); height: 100%;
+  display: flex; align-items: center; gap: 8px; padding: 0 18px; background: var(--surface);
+  border-right: 1px solid var(--line); }
+.corner-label { font-size: 13px; font-weight: 800; }
+.corner-count { font-size: 11px; font-weight: 700; color: var(--ink-2); background: var(--bg);
+  padding: 1px 8px; border-radius: 999px; }
+.axis-track { position: relative; flex: 1; }
+.tick { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; padding-left: 10px; }
+.tick::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 1px; background: var(--line); }
+.tick-hour span { font-size: 13.5px; font-weight: 800; color: var(--ink-1); font-variant-numeric: tabular-nums; }
+.tick-half span { font-size: 12px; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 
-/* ─── EPG PAGE ────────────────────────────────────────── */
-#pageEPG { display:none; flex-direction:column; overflow:hidden; flex:1; }
-#pageEPG.active { display:flex; }
+.epg-rows { position: relative; }
+.epg-row { display: flex; height: var(--row-h); border-bottom: 1px solid var(--line); }
+.epg-row.hidden { display: none; }
+.epg-row:nth-child(even) .epg-track { background: color-mix(in oklab, var(--ink-1) 1.6%, transparent); }
+.epg-rail { position: sticky; left: 0; z-index: 20; flex: none; width: var(--rail-w); height: 100%;
+  display: flex; align-items: center; gap: 11px; padding: 0 16px; background: var(--surface);
+  border-right: 1px solid var(--line); overflow: hidden; }
+.ch-logo { flex: none; width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center;
+  font-size: 12px; font-weight: 800; letter-spacing: -0.02em; overflow: hidden; }
+.ch-logo img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
+.rail-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.rail-name { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rail-meta { display: flex; align-items: center; gap: 8px; }
+.rail-num { font-size: 11px; font-weight: 800; color: var(--ink-2); background: var(--bg);
+  padding: 1px 7px; border-radius: 6px; font-variant-numeric: tabular-nums; }
+.rail-catbar { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
 
-/* Time + TZ header strip */
-.time-hdr {
-  height:var(--time-h); flex-shrink:0; display:flex; overflow:hidden;
-  border-bottom:1px solid var(--border); background:var(--sidebar);
-  position:relative; z-index:20;
-}
-.time-ch-gap {
-  width:var(--ch-w); flex-shrink:0; border-right:1px solid var(--border);
-  background:var(--sidebar); display:flex; flex-direction:column;
-  justify-content:center; padding:6px 8px; gap:5px;
-}
+.epg-track { position: relative; flex: 1; height: 100%; }
+.cell { position: absolute; top: 5px; bottom: 5px; display: flex; align-items: stretch; overflow: hidden;
+  border-radius: 12px; text-align: left; padding: 0; transition: transform .12s, box-shadow .12s, filter .12s;
+  background: color-mix(in oklab, var(--cell-accent) 9%, var(--surface)); }
+.cell:hover { transform: translateY(-1px); box-shadow: 0 8px 20px -10px rgba(20,24,50,.4); z-index: 5; }
+.cell-main { display: flex; flex-direction: column; justify-content: center; gap: 3px; padding: 7px 11px; min-width: 0; flex: 1; }
+.cell-title { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.cell-titletext { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cell-time { font-size: 11px; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.cell.is-now { box-shadow: inset 0 0 0 2px var(--cell-accent);
+  background: color-mix(in oklab, var(--cell-accent) 16%, var(--surface)); }
+.cell.is-past { filter: grayscale(.5); opacity: .58; }
+.cell.is-past:hover { opacity: .85; filter: none; }
+.cell-nowtag { position: absolute; top: 5px; right: 5px; font-size: 8.5px; font-weight: 900; letter-spacing: .06em;
+  background: var(--cell-accent); color: #fff; padding: 2px 5px; border-radius: 5px; }
+.cell.is-tight .cell-time { display: none; }
+.cell.is-tight .cell-main { padding: 4px 7px; }
+.cell.is-tight .cell-nowtag { display: none; }
+.epg-empty { padding: 60px; text-align: center; color: var(--ink-2); font-weight: 600; }
 
-/* Search box */
-.ch-search-wrap {
-  display:flex; align-items:center; gap:5px;
-  background:var(--card); border:1px solid var(--border);
-  border-radius:8px; padding:4px 8px; transition:border-color .15s;
-}
-.ch-search-wrap:focus-within { border-color:var(--accent); }
-.ch-search-wrap .ico { font-size:12px; color:var(--muted); flex-shrink:0; }
-#chSearch {
-  border:none; outline:none; background:transparent;
-  font-size:12px; color:var(--text); width:100%;
-  font-family:inherit;
-}
-#chSearch::placeholder { color:var(--muted); }
-.ch-search-clear {
-  display:none; border:none; background:none; cursor:pointer;
-  color:var(--muted); font-size:14px; padding:0; line-height:1;
-  flex-shrink:0;
-}
-.ch-search-clear.show { display:block; }
-.ch-search-clear:hover { color:var(--text); }
+.now-line { position: absolute; top: 0; bottom: 0; width: 2px; z-index: 25; pointer-events: none; background: var(--accent); }
+.now-bubble { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: 800;
+  color: #fff; padding: 2px 8px; border-radius: 999px; font-variant-numeric: tabular-nums; white-space: nowrap; background: var(--accent); }
 
-/* Filter count badge */
-#filterCount {
-  font-size:10px; color:var(--accent); font-weight:600;
-  text-align:center; display:none;
-}
-#filterCount.show { display:block; }
+/* ===== Program detail ===== */
+.pd-scrim { position: fixed; inset: 0; z-index: 200; background: rgba(15,18,35,.42); backdrop-filter: blur(3px);
+  display: flex; justify-content: flex-end; animation: fade .18s ease; }
+@keyframes fade { from { opacity: 0; } }
+.pd-panel { position: relative; width: 420px; max-width: 92vw; height: 100%; background: var(--surface);
+  display: flex; flex-direction: column; box-shadow: -20px 0 50px -20px rgba(0,0,0,.4);
+  animation: slidein .26s cubic-bezier(.2,.7,.3,1); }
+@keyframes slidein { from { transform: translateX(40px); opacity: .4; } }
+.pd-close { position: absolute; top: 16px; right: 16px; z-index: 3; width: 36px; height: 36px; border-radius: 50%;
+  display: grid; place-items: center; color: var(--ink-1); background: color-mix(in oklab, var(--surface) 60%, transparent);
+  backdrop-filter: blur(4px); transition: background .15s; }
+.pd-close:hover { background: var(--bg); }
+.pd-hero { padding: 30px 28px 22px; background: linear-gradient(160deg, color-mix(in oklab, var(--pd-accent) 16%, var(--surface)), var(--surface));
+  border-bottom: 1px solid var(--line); }
+.pd-chanrow { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.pd-logo { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; font-size: 14px; font-weight: 800; overflow:hidden; }
+.pd-logo img { width:100%; height:100%; object-fit:contain; background:#fff; }
+.pd-chanmeta { display: flex; flex-direction: column; gap: 2px; }
+.pd-channame { font-size: 15px; font-weight: 700; }
+.pd-channum { font-size: 12px; color: var(--ink-2); font-weight: 500; }
+.pd-title { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; text-wrap: balance; }
+.pd-tags { display: flex; gap: 7px; margin-top: 14px; flex-wrap: wrap; }
+.pd-tag { font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--bg); color: var(--ink-2); }
+.pd-tag.tag-live { background: var(--accent); color: #fff; }
+.pd-body { flex: 1; overflow-y: auto; padding: 22px 28px; }
+.pd-timecard { display: flex; align-items: center; justify-content: space-between; background: var(--bg);
+  border-radius: 16px; padding: 16px 22px; margin-bottom: 24px; }
+.pd-timeblock { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.pd-timebig { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.pd-timelabel { font-size: 11px; color: var(--ink-2); font-weight: 600; }
+.pd-timearrow { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--ink-2); font-size: 12px; font-weight: 600; }
+.pd-section { margin-bottom: 24px; }
+.pd-section h3 { font-size: 13px; font-weight: 800; margin-bottom: 10px; }
+.pd-section p { font-size: 14px; line-height: 1.7; color: var(--ink-2); text-wrap: pretty; }
+.pd-actions { flex: none; display: flex; gap: 10px; padding: 16px 28px; border-top: 1px solid var(--line); }
+.pd-btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px;
+  border-radius: 13px; font-size: 14px; font-weight: 700; transition: all .15s; }
+.pd-btn-ghost { background: var(--bg); color: var(--ink-1); }
+.pd-btn-ghost:hover { background: var(--line); }
+.pd-btn-ghost.is-on { color: #C28A1A; background: #F8EFD6; }
+.pd-btn-primary { background: var(--accent); color: #fff; }
+.pd-btn-primary:hover { filter: brightness(1.06); }
 
-/* TZ pills */
-.tz-pills { display:none; align-items:center; gap:3px; justify-content:center; }
-.tz-pills.show { display:flex; }
-.tz-pill {
-  font-size:10px; font-weight:600; padding:2px 6px;
-  border-radius:10px; border:1px solid var(--border);
-  background:transparent; color:var(--muted); cursor:pointer;
-  transition:background .12s, color .12s; white-space:nowrap;
-}
-.tz-pill.active { background:var(--accent); color:#fff; border-color:var(--accent); }
-.tz-pill:hover:not(.active) { background:var(--card2); }
+.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 300;
+  background: var(--ink-1); color: var(--surface); padding: 13px 22px; border-radius: 12px; font-size: 14px; font-weight: 600;
+  box-shadow: 0 14px 36px -12px rgba(0,0,0,.5); animation: toastin .25s cubic-bezier(.2,.7,.3,1); }
+@keyframes toastin { from { transform: translate(-50%, 14px); opacity: 0; } }
 
-/* Category filter bar */
-.cat-bar {
-  display:none; flex-shrink:0; align-items:center; gap:6px;
-  padding:7px 12px; overflow-x:auto; overflow-y:hidden; white-space:nowrap;
-  background:var(--sidebar); border-bottom:1px solid var(--border);
-  scrollbar-width:thin; z-index:21;
-}
-.cat-bar.show { display:flex; }
-.cat-bar::-webkit-scrollbar { height:4px; }
-.cat-bar::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
-.cat-pill {
-  flex-shrink:0; font-size:12px; font-weight:600; padding:4px 12px;
-  border-radius:14px; border:1px solid var(--border);
-  background:var(--card); color:var(--muted); cursor:pointer;
-  transition:background .12s, color .12s, border-color .12s; white-space:nowrap;
-}
-.cat-pill.active { background:var(--accent); color:#fff; border-color:var(--accent); }
-.cat-pill:hover:not(.active) { background:var(--card2); color:var(--text); }
-.cat-pill .cnt { font-size:10px; opacity:.7; margin-left:3px; }
+/* TZ pills (US) */
+.tzpills { display: none; gap: 4px; }
+.tzpills.show { display: flex; }
+.tzpill { font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 999px; background: var(--bg); color: var(--ink-2); }
+.tzpill.is-active { background: var(--accent); color: #fff; }
 
-.time-slots-wrap { flex:1; overflow:hidden; }
-.time-slots { display:flex; height:100%; width:max-content; }
-.ts {
-  flex-shrink:0; width:var(--slot-w); border-right:1px solid var(--border);
-  display:flex; align-items:center; padding-left:8px;
-  font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums;
-}
-.ts.h0 { color:var(--text); font-weight:600; font-size:12px; }
-
-/* EPG body */
-.epg-body { flex:1; display:flex; overflow:hidden; }
-
-/* Channel sidebar */
-.ch-sidebar {
-  width:var(--ch-w); flex-shrink:0; overflow-y:auto; overflow-x:hidden;
-  border-right:1px solid var(--border); background:var(--sidebar);
-  scrollbar-width:none;
-}
-.ch-sidebar::-webkit-scrollbar { display:none; }
-.ch-cell {
-  height:var(--row-h); display:flex; align-items:center;
-  gap:8px; padding:0 10px; border-bottom:1px solid var(--border);
-  cursor:pointer; transition:background .12s; flex-shrink:0; position:relative;
-}
-.ch-cell:hover { background:var(--card2); }
-.ch-cell.sel { background:var(--accent2); border-left:3px solid var(--accent); padding-left:7px; }
-.ch-ico {
-  font-size:20px; width:36px; height:36px; border-radius:9px;
-  background:var(--card); border:1px solid var(--border);
-  display:flex; align-items:center; justify-content:center; flex-shrink:0;
-  overflow:hidden;
-}
-.ch-logo { width:100%; height:100%; object-fit:contain; background:#fff; }
-/* Emoji fallback when the real logo image is missing / failed */
-.ch-ico.noimg::before { content:attr(data-ico); font-size:20px; }
-.ch-txt { min-width:0; }
-.ch-n  { font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text); }
-.ch-np { font-size:10px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
-.ch-live-dot {
-  width:6px; height:6px; border-radius:50%; background:var(--live);
-  position:absolute; right:10px; top:50%; transform:translateY(-50%);
-  animation:blink 1.8s ease-in-out infinite;
-}
-@keyframes blink { 0%,100%{opacity:1}50%{opacity:.2} }
-
-/* Programs scroll */
-.prog-scroll { flex:1; overflow:auto; position:relative; }
-.prog-grid   { position:relative; width:max-content; }
-
-/* NOW line */
-.now-line {
-  position:absolute; top:0; bottom:0; width:2px;
-  background:var(--now-clr); z-index:6; pointer-events:none;
-}
-.now-line::before {
-  content:'NOW'; position:absolute; top:0; left:4px;
-  background:var(--now-clr); color:#fff;
-  font-size:9px; font-weight:700; padding:1px 5px; border-radius:3px; letter-spacing:.4px;
-}
-
-.prog-row { height:var(--row-h); display:flex; border-bottom:1px solid var(--border); }
-.prog-row.real-row { position:relative; }
-
-/* Program block */
-.pb {
-  flex-shrink:0; height:100%; border-right:1px solid var(--border);
-  padding:8px 10px; overflow:hidden; cursor:pointer;
-  position:relative; background:var(--card); transition:background .1s; min-width:30px;
-}
-.pb:hover  { background:var(--card2); }
-.pb.live   { background:rgba(82,72,212,.07); border-top:2px solid var(--accent); padding-top:6px; }
-.pb.live:hover { background:rgba(82,72,212,.14); }
-.pb.past   { opacity:.4; }
-.pb.sel-prog { background:rgba(82,72,212,.18) !important; }
-
-/* ✅ VERIFIED (from TVMaze real data) */
-.pb.verified        { background:var(--verified-bg) !important; border-top:2px solid var(--verified-top); padding-top:6px; }
-.pb.verified:hover  { background:rgba(0,160,60,.2) !important; }
-.pb.verified.past   { opacity:.5; }
-.pb.verified .pb-title { color:#006b28; font-weight:700; }
-.pb.verified .pb-time  { color:#339955; }
-.pb.verified.real-fit {
-  position:absolute; top:0; bottom:0; height:auto; z-index:3;
-  border-left:1px solid rgba(0,160,60,.18);
-  box-shadow:inset 0 0 0 1px rgba(0,160,60,.08);
-}
-.verified-badge { display:none; }
-/* NOW badge on the currently-airing program */
-.now-badge {
-  position:absolute; top:5px; right:6px;
-  font-size:8.5px; font-weight:900; letter-spacing:.04em; line-height:1.3;
-  color:#fff; background:var(--accent); border-radius:5px; padding:2px 5px;
-}
-/* Category pill colored dot */
-.cat-dot { display:inline-block; width:7px; height:7px; border-radius:50%;
-  margin-right:5px; vertical-align:middle; }
-/* Real-data-only regions: render placeholder (non-verified) blocks as
-   empty gaps — keep their width so verified blocks stay time-aligned. */
-.prog-grid.real-only .pb:not(.verified) {
-  background:transparent !important; border-right-color:transparent;
-  cursor:default; pointer-events:none;
-}
-.prog-grid.real-only .pb:not(.verified) > * { visibility:hidden; }
-/* Hide channels without real (live) program data */
-.ch-cell.nodata, .prog-row.nodata { display:none !important; }
-
-.pb-title { font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text); }
-.pb.live .pb-title { color:var(--accent); }
-.pb-time  { font-size:10px; color:var(--muted); margin-top:3px; font-variant-numeric:tabular-nums;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.pb.tight { padding-left:6px; padding-right:6px; }
-.pb.tight .pb-title { display:none; }
-.pb.tight .pb-time { margin-top:0; font-size:9px; }
-.pb-bar   { position:absolute; bottom:0; left:0; height:2px; background:var(--accent); }
-
-/* Loading overlay on prog-row */
-.loading-shimmer {
-  animation: shimmer 1.4s infinite;
-  background: linear-gradient(90deg, var(--card) 0%, var(--card2) 50%, var(--card) 100%);
-  background-size: 200% 100%;
-}
-@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-
-/* ─── DETAIL PANEL ────────────────────────────────────── */
-#detailPanel {
-  flex-shrink:0; max-height:0; overflow:hidden;
-  background:var(--card); border-top:1px solid var(--border);
-  transition:max-height .28s ease; box-shadow:0 -2px 12px rgba(0,0,0,.08);
-}
-#detailPanel.open { max-height:210px; }
-.dp-inner {
-  padding:16px 20px 18px;
-  display:grid; grid-template-columns:auto 1fr auto; gap:0 16px; align-items:start;
-}
-.dp-ico   { font-size:38px; padding-top:2px; }
-.dp-ch    { font-size:11px; color:var(--muted); margin-bottom:4px; }
-.dp-title { font-size:19px; font-weight:800; line-height:1.25; color:var(--text); }
-.dp-meta  { font-size:12px; color:var(--muted); margin-top:5px; }
-.dp-desc  { font-size:13px; color:#606080; margin-top:10px; line-height:1.65; }
-.dp-tags  { display:flex; gap:7px; margin-top:10px; flex-wrap:wrap; }
-.tag {
-  font-size:11px; padding:3px 10px; border-radius:20px;
-  border:1px solid var(--border); color:var(--muted); background:var(--card2);
-}
-.tag.live-tag   { border-color:rgba(0,122,53,.4); color:var(--live); background:rgba(0,122,53,.08); }
-.tag.real-tag   { border-color:rgba(0,160,60,.4); color:#006b28; background:rgba(0,160,60,.1); }
-.dp-close {
-  background:var(--card2); border:1px solid var(--border); color:var(--muted);
-  width:28px; height:28px; border-radius:50%; font-size:16px; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; transition:color .15s;
-  flex-shrink:0;
-}
-.dp-close:hover { color:var(--text); }
-
-/* ─── Original design file visual pass ─────────────────── */
-:root {
-  --bg:#f4f5fa;
-  --sidebar:#f6f7fc;
-  --card:#ffffff;
-  --card2:#eef1fb;
-  --border:#e9ecf5;
-  --accent:#4f5bd5;
-  --accent2:rgba(79,91,213,.12);
-  --text:#1b1e28;
-  --muted:#7c8298;
-  --now-clr:#4f5bd5;
-  --verified-bg:#f3f5fe;
-  --verified-top:#e9edf8;
-  --ch-w:210px;
-  --row-h:78px;
-  --hdr-h:72px;
-  --time-h:48px;
-}
-#hdr {
-  padding:0 28px;
-  gap:14px;
-  background:rgba(255,255,255,.96);
-  border-bottom:1px solid #edf0f7;
-}
-#backBtn {
-  width:38px; height:38px; border-radius:8px;
-  border:1px solid #eef1f8; background:#f8f9fd;
-  transition:background .15s, transform .15s;
-}
-#backBtn:hover { background:#eef1fb; transform:translateX(-2px); }
-#hdrTitle { font-size:22px; font-weight:900; letter-spacing:0; }
-#hdrSub { font-size:12px; font-weight:600; margin-top:3px; }
-.region-trigger {
-  height:42px; min-width:130px; border-color:#eef1f8;
-  background:#f8f9fd; box-shadow:0 1px 3px rgba(20,24,60,.04);
-}
-.region-trigger .flag-mini { width:30px; height:30px; background:#fff; }
-.cat-bar {
-  padding:14px 24px;
-  gap:10px;
-  background:#fff;
-  border-bottom:1px solid #edf0f7;
-}
-.cat-pill {
-  font-size:13px; font-weight:800;
-  padding:8px 16px;
-  border-radius:999px;
-  border-color:#edf0f7;
-  background:#f7f8fd;
-}
-.time-hdr { background:#fbfcff; border-bottom:1px solid #e9ecf5; }
-.time-ch-gap { background:#fbfcff; border-right:1px solid #e9ecf5; }
-.ts { font-size:12px; padding-left:12px; color:#858aa4; border-right:1px solid #e9ecf5; }
-.ts.h0 { font-size:14px; font-weight:900; color:#171a27; }
-.ch-sidebar { background:#fbfcff; border-right:1px solid #e9ecf5; }
-.ch-cell {
-  gap:12px;
-  padding:0 16px;
-  border-bottom:1px solid #e9ecf5;
-}
-.ch-cell:hover { background:#f3f5fb; }
-.ch-cell.sel { background:#eef2ff; border-left:4px solid var(--accent); padding-left:12px; }
-.ch-ico {
-  width:42px; height:42px; border-radius:8px;
-  border:1px solid #eef1f8;
-}
-.ch-n { font-size:14px; font-weight:900; }
-.ch-np { font-size:11px; font-weight:600; margin-top:4px; }
-.prog-row { border-bottom:1px solid #e9ecf5; }
-.pb {
-  padding:14px 14px;
-  border-right:1px solid #e9ecf5;
-  background:#f7f8fe;
-}
-.pb:hover { background:#eff2fb; }
-.pb-title { font-size:13px; font-weight:800; color:#171a27; }
-.pb-time { font-size:11px; margin-top:5px; color:#707891; }
-.pb.live {
-  background:#e1e6fb;
-  border:1px solid #5964c8;
-  box-shadow:inset 0 0 0 1px rgba(79,91,213,.8);
-  border-radius:8px;
-  padding-top:13px;
-}
-.pb.verified {
-  background:#f3f5fe !important;
-  border-top:1px solid #e9edf8;
-  padding-top:14px;
-}
-.pb.verified:hover { background:#edf1fb !important; }
-.pb.verified .pb-title { color:#171a27; font-weight:900; }
-.pb.verified .pb-time { color:#707891; }
-.pb.verified.real-fit {
-  border-left:1px solid #e9ecf5;
-  box-shadow:inset 0 0 0 1px rgba(79,91,213,.035);
-}
-.pb.verified.live {
-  background:#e1e6fb !important;
-  border:1px solid #5964c8 !important;
-  box-shadow:inset 0 0 0 1px rgba(79,91,213,.72);
-}
-.pb.verified.live .pb-title { color:#111529; }
-.pb.verified.live .pb-time { color:#5f6680; }
-.now-badge {
-  top:6px; right:6px;
-  background:var(--accent);
-  border-radius:5px;
-}
-.pb.tight { padding:8px 6px; }
-.pb.tight .pb-time { font-size:9px; margin-top:0; }
-.pb-bar { display:none; }
-
-/* ─── SCROLLBAR ───────────────────────────────────────── */
-.prog-scroll::-webkit-scrollbar { width:6px; height:6px; }
-.prog-scroll::-webkit-scrollbar-track { background:var(--card2); }
-.prog-scroll::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
-.prog-scroll::-webkit-scrollbar-thumb:hover { background:var(--muted); }
-
-/* ═══════════════════════════════════════════════════════════
-   RESPONSIVE — iPad (≤1024px) and phone (≤640px)
-   Grid metrics (--slot-w / --row-h) are driven by JS, so we only
-   scale the sidebar width, typography and chrome here.
-   ═══════════════════════════════════════════════════════════ */
-
-/* iPad / tablet */
-@media (max-width:1024px){
-  :root{ --ch-w:152px; }
-  #hdrTitle{ font-size:16px; }
-  .cat-pill{ font-size:11px; padding:4px 11px; }
-  .dp-title{ font-size:18px; }
-}
-
-/* Phone */
-@media (max-width:640px){
-  :root{ --ch-w:120px; --hdr-h:50px; --time-h:54px; }
-  #hdr{ padding:0 10px; gap:8px; }
-  #backBtn{ width:30px; height:30px; font-size:18px; }
-  #hdrTitle{ font-size:15px; }
-  #hdrSub{ font-size:9px; }
-  .region-trigger{ min-width:92px; height:34px; padding:3px 6px; }
-  .region-trigger .count{ display:none; }
-  .region-trigger .flag-mini{ width:26px; height:26px; }
-  .region-menu{ left:-42px; width:204px; }
-  .clock .hm{ font-size:15px; }
-  .clock .date{ font-size:9px; }
-
-  /* Home */
-  #pageHome{ padding:14px; }
-  .home-hero{ grid-template-columns:1fr; gap:16px; padding:6px 0 20px; }
-  .home-title{ font-size:28px; }
-  .home-sub{ font-size:13px; }
-  .flag-dock{ grid-template-columns:repeat(4,1fr); }
-  .flag-dock button{ width:100%; }
-  .region-grid{ grid-template-columns:repeat(2,1fr); gap:10px; }
-  .region-card{ padding:20px 8px 14px; border-radius:8px; }
-  .flag{ font-size:40px; }
-  .region-name{ font-size:13px; }
-
-  /* Category bar */
-  .cat-bar{ padding:6px 8px; gap:5px; }
-  .cat-pill{ font-size:11px; padding:4px 10px; border-radius:13px; }
-  .cat-pill .cnt{ font-size:9px; }
-
-  /* Search / TZ in the left gap */
-  .time-ch-gap{ padding:5px 6px; gap:4px; }
-  .ch-search-wrap{ padding:3px 6px; }
-  #chSearch{ font-size:11px; }
-  #chSearch::placeholder{ font-size:10px; }
-  .tz-pill{ font-size:9px; padding:2px 5px; }
-
-  /* Channel cells */
-  .ch-cell{ gap:6px; padding:0 7px; }
-  .ch-ico{ font-size:16px; width:28px; height:28px; border-radius:7px; }
-  .ch-n{ font-size:11px; }
-  .ch-np{ font-size:9px; }
-  .ch-live-dot{ right:6px; }
-
-  /* Program blocks */
-  .pb{ padding:6px 7px; }
-  .pb-title{ font-size:11px; }
-  .pb-time{ font-size:9px; margin-top:2px; }
-
-  /* Detail panel → full-width bottom sheet */
-  #detailPanel.open{ max-height:50vh; }
-  .dp-inner{ padding:14px 16px 18px; gap:0 12px; }
-  .dp-ico{ font-size:30px; }
-  .dp-title{ font-size:16px; }
-  .dp-desc{ font-size:12px; margin-top:8px; line-height:1.55;
-            max-height:28vh; overflow-y:auto; }
+/* ===== Responsive: phone ===== */
+@media (max-width: 640px) {
+  .appbar { padding: 11px 14px; }
+  .appbar-title { font-size: 17px; }
+  .appbar-icon { width: 36px; height: 36px; }
+  .appbar-flag { font-size: 24px; }
+  .clock { font-size: 19px; }
+  .rs-main { padding: 22px 16px 40px; }
+  .rs-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .rs-card { padding: 16px; gap: 12px; border-radius: 16px; }
+  .rs-flagtile { width: 50px; height: 50px; font-size: 28px; border-radius: 13px; }
+  .rs-name { font-size: 16px; }
+  .epg-filters { padding: 10px 12px; gap: 10px; flex-wrap: wrap; }
+  .searchbox { width: 100%; order: 2; }
+  .chips { order: 1; width: 100%; }
+  .epg { --rail-w: 128px !important; }
+  .ch-logo { width: 32px; height: 32px; }
+  .rail-name { font-size: 12.5px; }
+  .pd-panel { width: 100%; max-width: 100%; }
 }
 </style>
 </head>
 <body>
-
-<!-- HEADER -->
-<header id="hdr">
-  <button id="backBtn" onclick="goHome()">‹</button>
-  <div class="region-select" id="regionSelect">
-    <button class="region-trigger" id="regionTrigger" onclick="toggleRegionMenu(event)" aria-haspopup="listbox" aria-expanded="false">
-      <span class="flag-mini" id="regionFlag">🇹🇼</span>
-      <span class="label">
-        <span class="name" id="regionName">台灣</span>
-        <span class="count" id="regionCount">186 個頻道</span>
-      </span>
-      <span class="chev">▾</span>
-    </button>
-    <div class="region-menu" id="regionMenu" role="listbox"></div>
-  </div>
-  <div class="hdr-info">
-    <div id="hdrTitle">📺 電視節目表</div>
-    <div id="hdrSub">選擇地區查看節目</div>
-  </div>
-  <div class="clock">
-    <div class="hm" id="clkHM">--:--</div>
-    <div class="date" id="clkDate"></div>
-  </div>
-</header>
-
-<div id="app">
-
-  <!-- HOME PAGE -->
-  <div id="pageHome" class="active">
-    <section class="home-hero">
-      <div>
-        <div class="home-title">用旗幟快速切換各地節目表</div>
-        <div class="home-sub">進入節目表後也能直接在左上角切換地區，頻道台標維持原本資料來源。</div>
-      </div>
-      <div class="flag-dock" aria-label="快速選擇地區">
-        <button onclick="openRegion('tw')" title="台灣">🇹🇼</button>
-        <button onclick="openRegion('hk')" title="香港">🇭🇰</button>
-        <button onclick="openRegion('cn')" title="中國大陸">🇨🇳</button>
-        <button onclick="openRegion('us')" title="美國">🇺🇸</button>
-        <button onclick="openRegion('jp')" title="日本">🇯🇵</button>
-        <button onclick="openRegion('uk')" title="英國">🇬🇧</button>
-        <button onclick="openRegion('kr')" title="韓國">🇰🇷</button>
-        <button onclick="openRegion('th')" title="泰國">🇹🇭</button>
-      </div>
-    </section>
-    <p class="home-heading">選擇地區</p>
-    <div class="region-grid">
-      <div class="region-card" onclick="openRegion('tw')">
-        <div class="flag">🇹🇼</div><div class="region-name">台灣</div><div class="region-cnt">186 個頻道</div>
-      </div>
-      <div class="region-card" onclick="openRegion('hk')">
-        <div class="flag">🇭🇰</div><div class="region-name">香港</div><div class="region-cnt">6 個頻道</div>
-      </div>
-      <div class="region-card" onclick="openRegion('cn')">
-        <div class="flag">🇨🇳</div><div class="region-name">中國大陸</div><div class="region-cnt">8 個頻道</div>
-      </div>
-      <div class="region-card" onclick="openRegion('us')">
-        <div class="flag">🇺🇸</div><div class="region-name">美國</div><div class="region-cnt">145 個頻道</div>
-      </div>
-      <div class="region-card" onclick="openRegion('jp')">
-        <div class="flag">🇯🇵</div><div class="region-name">日本</div><div class="region-cnt">6 個頻道</div>
-      </div>
-      <div class="region-card" onclick="openRegion('uk')">
-        <div class="flag">🇬🇧</div><div class="region-name">英國</div><div class="region-cnt">5 個頻道</div>
-      </div>
-      <div class="region-card" onclick="openRegion('kr')">
-        <div class="flag">🇰🇷</div><div class="region-name">韓國</div><div class="region-cnt">5 個頻道</div>
-      </div>
-      <div class="region-card" onclick="openRegion('th')">
-        <div class="flag">🇹🇭</div><div class="region-name">泰國</div><div class="region-cnt">4 個頻道</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- EPG PAGE -->
-  <div id="pageEPG">
-    <div class="cat-bar" id="catBar"></div>
-    <div class="time-hdr">
-      <div class="time-ch-gap">
-        <div class="ch-search-wrap">
-          <span class="ico">🔍</span>
-          <input id="chSearch" type="text" placeholder="搜尋頻道名稱或頻道號…" autocomplete="off" oninput="filterChannels(this.value)" />
-          <button class="ch-search-clear" id="chSearchClear" onclick="clearFilter()">×</button>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;min-height:18px">
-          <div class="tz-pills" id="tzPills">
-            <button class="tz-pill active" onclick="setTZ(-4,'ET')" id="tzET">ET</button>
-            <button class="tz-pill" onclick="setTZ(-5,'CT')" id="tzCT">CT</button>
-            <button class="tz-pill" onclick="setTZ(-6,'MT')" id="tzMT">MT</button>
-            <button class="tz-pill" onclick="setTZ(-7,'PT')" id="tzPT">PT</button>
-          </div>
-          <span id="filterCount"></span>
-        </div>
-      </div>
-      <div class="time-slots-wrap" id="timeSlotsWrap">
-        <div class="time-slots" id="timeSlots"></div>
-      </div>
-    </div>
-    <div class="epg-body">
-      <div class="ch-sidebar" id="chSidebar"></div>
-      <div class="prog-scroll" id="progScroll">
-        <div class="prog-grid" id="progGrid">
-          <div class="now-line" id="nowLine"></div>
-        </div>
-      </div>
-    </div>
-    <div id="detailPanel">
-      <div class="dp-inner">
-        <div class="dp-ico" id="dpIco"></div>
-        <div class="dp-body">
-          <div class="dp-ch"    id="dpCh"></div>
-          <div class="dp-title" id="dpTitle"></div>
-          <div class="dp-meta"  id="dpMeta"></div>
-          <div class="dp-desc"  id="dpDesc"></div>
-          <div class="dp-tags"  id="dpTags"></div>
-        </div>
-        <button class="dp-close" onclick="closeDetail()">×</button>
-      </div>
-    </div>
-  </div>
-
-</div>
-
+<div id="root"></div>
 <script>
-// ═══ CONSTANTS ════════════════════════════════════════════
-const SLOT_W  = 110;
-const MIN_PX  = SLOT_W / 30;
-const GRID_S  = 5;
-const GRID_E  = 26;
-const ROW_H   = 66;
 
-// ═══ REGIONS ══════════════════════════════════════════════
-const REGIONS = {
-  tw:{ name:'台灣',     flag:'🇹🇼', tz:'Asia/Taipei',    off:8  },
-  hk:{ name:'香港',     flag:'🇭🇰', tz:'Asia/Hong_Kong', off:8  },
-  cn:{ name:'中國大陸', flag:'🇨🇳', tz:'Asia/Shanghai',  off:8  },
-  us:{ name:'美國',     flag:'🇺🇸', tz:'America/New_York',off:-4 },
-  jp:{ name:'日本',     flag:'🇯🇵', tz:'Asia/Tokyo',     off:9  },
-  uk:{ name:'英國',     flag:'🇬🇧', tz:'Europe/London',  off:1  },
-  kr:{ name:'韓國',     flag:'🇰🇷', tz:'Asia/Seoul',     off:9  },
-  th:{ name:'泰國',     flag:'🇹🇭', tz:'Asia/Bangkok',   off:7  },
-};
-
-// ═══ CHANNELS ═════════════════════════════════════════════
 const CHANNELS = {
   tw:[
     // ── 無線四台 ───────────────────────────────
@@ -1157,540 +684,9 @@ const TVMAZE_MAP = {
 };
 
 // ═══ SHOW POOLS ═══════════════════════════════════════════
-const SHOWS = {
-  tw:{
-    news:['台視晚間新聞','今日看世界','新聞最前線','全球新視野','早安新聞','新聞空間','財經新聞'],
-    drama:['台灣囝仔','幸福滿屋','愛情來了','星願','天使的眼睛','愛你一萬年','世間情'],
-    variety:['綜藝大集合','快樂星期天','娛樂百分百','今晚誰當家','食尚玩家','型男大主廚'],
-    movie:['星期日電影院','週末大放送','電影不散場','影視精選'],
-    info:['健康2.0','健康好生活','消費高手','生活公信力'],
-  },
-  hk:{
-    news:['六點半新聞','TVB新聞','新聞報道','香港早晨','晚間新聞'],
-    drama:['無線劇場','愛回家','萬千星輝','香港愛情故事','廉政行動'],
-    variety:['勁歌金曲','開心百分百','獎門人'],
-    movie:['港產片精選','電影精選'],
-  },
-  cn:{
-    news:['新聞聯播','焦點訪談','朝聞天下','新聞直播間','面對面'],
-    drama:['甄嬛傳','星漢燦爛','夢華錄','知否知否','長月燼明','慶餘年'],
-    variety:['快樂大本營','天天向上','我是歌手','奔跑吧','中國好聲音'],
-    movie:['電影頻道大片','國產電影精選'],
-  },
-  us:{
-    news:['CNN Newsroom','The Situation Room','Anderson Cooper 360','Erin Burnett OutFront',
-          'Fox & Friends','America\'s Newsroom','Hannity','Tucker Carlson','The Ingraham Angle',
-          'Morning Joe','Deadline: White House','The Rachel Maddow Show',
-          'Squawk Box','Fast Money','Mad Money','Power Lunch','Bloomberg Markets'],
-    drama:['Grey\'s Anatomy','NCIS','Law & Order: SVU','FBI','The Good Doctor','This Is Us',
-           'Blue Bloods','9-1-1','Chicago PD','Chicago Fire','The Rookie',
-           'House of the Dragon','The Last of Us','Succession','White Lotus'],
-    comedy:['The Tonight Show','Late Show','Jimmy Kimmel Live','SNL','Abbott Elementary',
-            'The Office','Friends','Big Bang Theory','Modern Family'],
-    sports:['SportsCenter','NFL Live','Baseball Tonight','NBA Tonight','NHL Tonight',
-            'Around the Horn','Pardon the Interruption','First Take'],
-    reality:['Top Chef','Project Runway','RuPaul\'s Drag Race','The Voice','Survivor',
-             'The Amazing Race','Big Brother','Real Housewives'],
-    sci:['Cosmos','Brain Games','Life Below Zero','Gold Rush','Deadliest Catch',
-         'Dirty Jobs','Mythbusters','How It\'s Made'],
-    movie:['Movie of the Week','Sunday Cinema','Blockbuster Night','HBO Feature'],
-    variety:['Entertainment Tonight','Access Hollywood','Extra'],
-    info:['Morning Express','Early Start','New Day'],
-  },
-  jp:{
-    news:['NHKニュース7','ニュースウォッチ9','おはよう日本'],
-    drama:['連続テレビ小説','大河ドラマ','土曜ドラマ'],
-    variety:['笑点','世界ふしぎ発見！','ダウンタウンDX'],
-    movie:['金曜ロードショー'],
-  },
-  uk:{
-    news:['BBC News at Six','BBC News at Ten','Newsnight','ITV Evening News'],
-    drama:['EastEnders','Casualty','Coronation Street','Call the Midwife'],
-    variety:['The Graham Norton Show','Strictly Come Dancing'],
-  },
-  kr:{
-    news:['KBS 뉴스 9','MBC 뉴스데스크','SBS 8뉴스'],
-    drama:['사랑의 불시착','이태원 클라쓰','더 글로리','나의 해방일지'],
-    variety:['런닝맨','놀면 뭐하니','복면가왕'],
-  },
-  th:{
-    news:['ข่าวเย็น','ข่าวค่ำ','ข่าวเที่ยง'],
-    drama:['บุพเพสันนิวาส','ลิขิตรัก','คู่กรรม'],
-    variety:['มาตามนัด','หนึ่งในร้อย'],
-  },
-};
 
-const DESCS = {
-  news:   'Breaking news coverage and in-depth analysis of today\'s top stories from around the world.',
-  drama:  'Compelling drama series with powerful performances and gripping storylines.',
-  comedy: 'Laugh-out-loud entertainment with top comedians and celebrity guests.',
-  sports: 'Live sports coverage, scores, highlights, and expert analysis.',
-  reality:'Real people, real drama — competitions, adventures, and life on screen.',
-  sci:    'Fascinating documentaries exploring science, nature, and the world around us.',
-  movie:  'Feature film presentation — sit back and enjoy tonight\'s movie.',
-  variety:'Entertainment for all: singing, dancing, games, and celebrity interviews.',
-  info:   'Health tips, lifestyle advice, and useful information for everyday life.',
-};
-
-const DURS = {
-  news:[30,60,60,30],drama:[60,60,90],comedy:[30,30,60],
-  sports:[60,90,120],reality:[60,60,90],sci:[60,90],
-  movie:[90,120],variety:[60,90],info:[30,60],
-};
-
-const TYPE_MAP = {
-  news:    ['us02','us03','us04','us05','us06','us12','us36','us45','us56','us59','us60',
-            'us77','us78','us79','us129','us130','us131','us132','us111'],
-  movie:   ['us07','us08','us09','us13','us53','us54','us64','us75','us76','us80','us81',
-            'us82','us84','us85','us133','us134','us135','us136','us137','us138','us139',
-            'us140','us141','us142','us143','us144','us145'],
-  sports:  ['us14','us18','us29','us34','us37','us38','us66','us67','us68','us69','us70',
-            'us86','us87','us88','us89','us90','us91','us92','us93','us94','us95','us96','us97'],
-  sci:     ['us15','us16','us24','us47','us98','us99','us100','us101','us102'],
-  reality: ['us20','us21','us28','us33','us43','us63','us103','us116','us119','us121','us122'],
-  comedy:  ['us39','us46','us49','us65','us74','us120'],
-  variety: ['us27','us31','us40','us44','us113','us118'],
-  drama:   ['us19','us42','us48','us51','us52','us55','us73','us114','us115','us117'],
-  info:    ['us10','us11','us17','us23','us123'],
-};
-const CH_TYPE_CACHE = {};
-function pickType(chId, h) {
-  if (!CH_TYPE_CACHE[chId]) {
-    for (const [type, ids] of Object.entries(TYPE_MAP)) {
-      if (ids.includes(chId)) { CH_TYPE_CACHE[chId] = type; break; }
-    }
-  }
-  if (CH_TYPE_CACHE[chId]) return CH_TYPE_CACHE[chId];
-  if (h>=6&&h<9)   return 'info';
-  if (h>=9&&h<12)  return 'variety';
-  if (h>=12&&h<14) return 'news';
-  if (h>=14&&h<18) return 'drama';
-  if (h>=18&&h<20) return 'news';
-  if (h>=20&&h<23) return 'drama';
-  return 'movie';
-}
-
-function buildSchedule(chId, regionId) {
-  const pool = SHOWS[regionId] || SHOWS.tw;
-  const seed = chId.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
-  const slots=[]; let cur=0;
-  const total=(GRID_E-GRID_S)*60;
-  let idx=seed%100;
-  while(cur<total){
-    const h=GRID_S+Math.floor(cur/60);
-    const type=pickType(chId,h);
-    const durArr=DURS[type]||[60];
-    const dur=durArr[(idx+Math.floor(cur/30))%durArr.length];
-    const showPool=pool[type]||pool.news||['節目播出中'];
-    const title=showPool[(idx+Math.floor(cur/60))%showPool.length];
-    const desc=DESCS[type]||DESCS.news;
-    slots.push({startMin:cur,dur,title,type,desc,real:false});
-    cur+=dur; idx=(idx+7)%100;
-  }
-  return slots;
-}
-
-// ═══ STATE ════════════════════════════════════════════════
-let curRegion=null, selChIdx=0, usTzOff=-4, usTzLabel='ET', curCat='all';
-
-// ═══ CLOCK ════════════════════════════════════════════════
-function pad(n){return String(n).padStart(2,'0');}
-function updateClock(){
-  const n=new Date();
-  document.getElementById('clkHM').textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
-  document.getElementById('clkDate').textContent=n.toLocaleDateString('zh-TW',{month:'short',day:'numeric',weekday:'short'});
-}
-updateClock(); setInterval(updateClock,1000);
-
-// ═══ LOCAL TIME ════════════════════════════════════════════
-function localNow(rid){
-  const r=REGIONS[rid];
-  const off=(rid==='us')?usTzOff:r.off;
-  try{
-    // Use Intl for non-US; for US use our offset
-    if(rid!=='us'){
-      const s=new Date().toLocaleString('en-US',{timeZone:r.tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
-      const[h,m]=s.split(':').map(Number);
-      return{h,m,totalMin:h*60+m};
-    }
-  }catch{}
-  const utc=new Date().getTime()+new Date().getTimezoneOffset()*60000;
-  const loc=new Date(utc+off*3600000);
-  return{h:loc.getHours(),m:loc.getMinutes(),totalMin:loc.getHours()*60+loc.getMinutes()};
-}
-function localTimeStr(rid){
-  const {h,m}=localNow(rid);
-  return`${pad(h)}:${pad(m)}`;
-}
-
-// ═══ TZ SELECTOR ══════════════════════════════════════════
-function setTZ(off,label){
-  usTzOff=off; usTzLabel=label;
-  document.querySelectorAll('.tz-pill').forEach(p=>p.classList.remove('active'));
-  document.getElementById('tz'+label).classList.add('active');
-  document.getElementById('hdrSub').textContent=`當地時間 ${localTimeStr('us')} (${label})`;
-  if(curRegion==='us') buildEPG('us');
-}
-
-// ═══ CHANNEL CATEGORIES ═══════════════════════════════════
-const CATS=[
-  {k:'all',     label:'全部',    color:'#4f5bd5'},
-  {k:'news',    label:'新聞',    color:'#e2483d'},
-  {k:'finance', label:'財經',    color:'#e8912b'},
-  {k:'ent',     label:'綜合娛樂',color:'#3aa85f'},
-  {k:'drama',   label:'戲劇',    color:'#c2497e'},
-  {k:'movie',   label:'電影',    color:'#4f5bd5'},
-  {k:'sports',  label:'體育',    color:'#2a8fd4'},
-  {k:'kids',    label:'兒童',    color:'#e0653a'},
-  {k:'doc',     label:'知識紀實',color:'#1f9e8f'},
-  {k:'music',   label:'音樂',    color:'#8b5cf6'},
-  {k:'religion',label:'宗教',    color:'#b08948'},
-];
-const CAT_LABEL=Object.fromEntries(CATS.map(c=>[c.k,c.label]));
-const CH_CAT_CACHE={};
-function channelCategory(ch){
-  if(CH_CAT_CACHE[ch.id])return CH_CAT_CACHE[ch.id];
-  const n=ch.n||'';
-  const has=(...arr)=>arr.some(k=>n.toLowerCase().includes(k.toLowerCase()));
-  let cat;
-  if(has('好消息','大愛','佛','慈悲','法界','唯心','信吉','華藏','正德','三聖','天美麗','新天地','福音','人間衛視','十方','佛衛','GOOD TV','EWTN','Daystar','TBN','Word Network','Inspiration','Catholic'))cat='religion';
-  else if(has('財經','商業','Bloomberg','CNBC','非凡','Fox Business','股','運通財經','全球財經','第1商業','寰宇財經'))cat='finance';
-  else if(has('體育','運動','Sport','ESPN','球','博斯','NBA','NFL','MLB','NHL','Golf','Tennis','Eleven','DAZN','UFC','WWE','Fight','beIN','SEC','ACC','Big Ten','TVG','Racing','Outdoor','Fishing','GolTV','智林','FanDuel','Marquee','BYU','Sportsman'))cat='sports';
-  else if(has('新聞','News','CNN','BBC','MSNBC','Fox News','寰宇','年代','Newsmax','半島','Al Jazeera','i24','Euronews','France','德國之聲','DW','鏡電視','TaiwanPlus','C-SPAN','NewsNation','HLN','NHK','Arirang','CGTN','NewsAsia','ETtoday','First TV','People TV','Right Now','Law & Crime','國會頻道'))cat='news';
-  else if(has('卡通','親子','幼','兒童','童','YOYO','MOMO親子','momo親子','Nick','Disney','Cartoon','Boomerang','Baby','Kids','尼克','ELTV','Animax','CBeebies','DreamWorks','Cartoonito','龍華動畫','Universal Kids','達文西'))cat='kids';
-  else if(has('探索','國家地理','動物','Discovery','Nat Geo','National Geographic','Smithsonian','History','歷史','紀實','知識','科學','Science','Animal','BBC Earth','BBC Lifestyle','DMAX','EVE','旅遊','美食','Travel','Food','TLC','Lifestyle','麥哲倫','視納華仁','HGTV','居家','幸福空間','Luxe','Magnolia','Cooking','DIY','FYI','Destination','American Heroes','Military','Investigation','Nature','Pet','Earth'))cat='doc';
-  else if(has('MTV','VH1','音樂','Music','Mezzo','CMusic','Trace','古典','KMTV','演唱','CMT','Revolt','Fuse','Stingray','Logo'))cat='music';
-  else if(has('電影','影城','片','Movie','Cinema','HBO','MAX','Cinemax','Starz','MGM','TMC','Flix','Showtime','采昌','美亞','影迷','Warner','天映','Hollywood','好萊塢','龍華電影','龍華洋片','AXN','FOX MOVIE','Encore','Sundance','IFC','TCM','Turner Classic','Comet','映畫'))cat='movie';
-  else if(has('戲劇','劇','Drama','偶像','韓劇'))cat='drama';
-  else cat='ent';
-  CH_CAT_CACHE[ch.id]=cat;
-  return cat;
-}
-
-// ═══ CHANNEL VISIBILITY (category + search + real-data) ═══
-function applyChannelVisibility(){
-  const input=document.getElementById('chSearch');
-  const q=(input?.value||'').trim().toLowerCase();
-  const cells=document.querySelectorAll('.ch-cell');
-  const rows=document.querySelectorAll('.prog-row');
-  let visible=0;
-  cells.forEach((cell,i)=>{
-    const catOk=curCat==='all'||cell.dataset.cat===curCat;
-    const name=cell.querySelector('.ch-n')?.textContent.toLowerCase()||'';
-    const num=(CHANNELS[curRegion]?.[i]?.num||'').toLowerCase();
-    const qOk=!q||name.includes(q)||num.includes(q);
-    const show=catOk&&qOk;
-    // Inline display controls category+search; CSS .nodata hides no-data
-    // channels until their real data arrives (then class is removed).
-    cell.style.display=show?'':'none';
-    if(rows[i])rows[i].style.display=show?'':'none';
-    if(show&&!cell.classList.contains('nodata'))visible++;
-  });
-  const clearBtn=document.getElementById('chSearchClear');
-  const countEl=document.getElementById('filterCount');
-  if(clearBtn)clearBtn.classList.toggle('show',q.length>0);
-  if(countEl){
-    if(q||curCat!=='all'){countEl.textContent=`${visible} 個頻道`;countEl.classList.add('show');}
-    else{countEl.textContent='';countEl.classList.remove('show');}
-  }
-}
-
-function filterChannels(q){ applyChannelVisibility(); }
-
-function clearFilter(){
-  const input=document.getElementById('chSearch');
-  if(input)input.value='';
-  applyChannelVisibility();
-}
-
-function setCat(cat){
-  curCat=cat;
-  document.querySelectorAll('.cat-pill').forEach(p=>p.classList.toggle('active',p.dataset.cat===cat));
-  applyChannelVisibility();
-}
-
-function renderCatBar(rid){
-  const bar=document.getElementById('catBar');
-  if(!bar)return;
-  const channels=CHANNELS[rid]||[];
-  // Count channels per category for this region
-  const counts={};
-  channels.forEach(ch=>{const c=channelCategory(ch);counts[c]=(counts[c]||0)+1;});
-  bar.innerHTML='';
-  CATS.forEach(c=>{
-    if(c.k!=='all'&&!counts[c.k])return; // skip empty categories
-    const b=document.createElement('button');
-    b.className='cat-pill'+(c.k===curCat?' active':'');
-    b.dataset.cat=c.k;
-    const n=c.k==='all'?channels.length:counts[c.k];
-    b.innerHTML=`<span class="cat-dot" style="background:${c.color}"></span>${c.label}<span class="cnt">${n}</span>`;
-    b.onclick=()=>setCat(c.k);
-    bar.appendChild(b);
-  });
-  bar.classList.add('show');
-}
-
-// ═══ CHANNEL LOGOS (real station logos) ═══════════════════
-const US_LOGO_BASE='https://us-tv-guide.com/logos/';
 const TW_LOGO={ 'tw_28':'https://tvking.funorange.com.tw/icon/n21.png','tw_27':'https://tvking.funorange.com.tw/icon/n33.png','tw_118':'https://tvking.funorange.com.tw/icon/n60.png','tw_44':'https://tvking.funorange.com.tw/icon/321.png','tw_29':'https://tvking.funorange.com.tw/icon/n34.png','tw_30':'https://tvking.funorange.com.tw/icon/n35.png','tw_39':'https://tvking.funorange.com.tw/icon/n14.png','tw_36':'https://tvking.funorange.com.tw/icon/n27.png?a=1','tw_10':'https://tvking.funorange.com.tw/icon/010.png','tw_308':'https://tvking.funorange.com.tw/icon/308.png','tw_310':'https://tvking.funorange.com.tw/icon/310.png','tw_13':'https://tvking.funorange.com.tw/icon/013.png','tw_8':'https://tvking.funorange.com.tw/icon/008.png','tw_409':'https://tvking.funorange.com.tw/icon/306.png','tw_6':'https://tvking.funorange.com.tw/icon/006.png','tw_151':'https://tvking.funorange.com.tw/icon/316.png','tw_152':'https://tvking.funorange.com.tw/icon/317.png','tw_314':'https://tvking.funorange.com.tw/icon/n25.png','tw_17':'https://tvking.funorange.com.tw/icon/017.png','tw_32':'https://tvking.funorange.com.tw/icon/n23.png','tw_37':'https://tvking.funorange.com.tw/icon/n37.png','tw_16':'https://tvking.funorange.com.tw/icon/016.png','tw_136':'https://tvking.funorange.com.tw/icon/n143.png','tw_78':'https://tvking.funorange.com.tw/icon/n73.png','tw_12':'https://tvking.funorange.com.tw/icon/012.png','tw_313':'https://tvking.funorange.com.tw/icon/n762.jpeg','tw_33':'https://tvking.funorange.com.tw/icon/n18.png','tw_117':'https://tvking.funorange.com.tw/icon/312.png','tw_266':'https://tvking.funorange.com.tw/icon/304.png','tw_268':'https://tvking.funorange.com.tw/icon/318.png','tw_302':'https://tvking.funorange.com.tw/icon/302.png','tw_303':'https://tvking.funorange.com.tw/icon/303.png','tw_267':'https://tvking.funorange.com.tw/icon/371.png','tw_26':'https://tvking.funorange.com.tw/icon/n24.png','tw_70':'https://tvking.funorange.com.tw/icon/n53.png','tw_77':'https://tvking.funorange.com.tw/icon/n72.png','tw_83':'https://tvking.funorange.com.tw/icon/313.png','tw_215':'https://tvking.funorange.com.tw/icon/377.png','tw_100':'https://tvking.funorange.com.tw/icon/n26.png','tw_45':'https://tvking.funorange.com.tw/icon/n71.png','tw_54':'https://tvking.funorange.com.tw/icon/n20.png','tw_42':'https://tvking.funorange.com.tw/icon/n32.png','tw_311':'https://tvking.funorange.com.tw/icon/311.png','tw_477':'https://tvking.funorange.com.tw/icon/376.png','tw_41':'https://tvking.funorange.com.tw/icon/n22.png','tw_40':'https://tvking.funorange.com.tw/icon/n36.png','tw_81':'https://tvking.funorange.com.tw/icon/357.png','tw_225':'https://tvking.funorange.com.tw/icon/356.png','tw_43':'https://tvking.funorange.com.tw/icon/n29.png','tw_48':'https://tvking.funorange.com.tw/icon/n38.png','tw_115':'https://tvking.funorange.com.tw/icon/503.png','tw_53':'https://tvking.funorange.com.tw/icon/507.png','tw_50':'https://tvking.funorange.com.tw/icon/n40.png','tw_51':'https://tvking.funorange.com.tw/icon/n42.png','tw_57':'https://tvking.funorange.com.tw/icon/n43.png','tw_59':'https://tvking.funorange.com.tw/icon/505.png','tw_49':'https://tvking.funorange.com.tw/icon/506.png','tw_208':'https://tvking.funorange.com.tw/icon/501.png','tw_55':'https://tvking.funorange.com.tw/icon/n41.png','tw_68':'https://tvking.funorange.com.tw/icon/n52.png','tw_66':'https://tvking.funorange.com.tw/icon/n48.png?a=1','tw_62':'https://tvking.funorange.com.tw/icon/n56.png','tw_67':'https://tvking.funorange.com.tw/icon/628.png','tw_80':'https://tvking.funorange.com.tw/icon/613.png','tw_63':'https://tvking.funorange.com.tw/icon/n57.png','tw_200':'https://tvking.funorange.com.tw/icon/n50.png','tw_71':'https://tvking.funorange.com.tw/icon/n49.png','tw_65':'https://tvking.funorange.com.tw/icon/n46.png','tw_190':'https://tvking.funorange.com.tw/icon/n501.png','tw_188':'https://tvking.funorange.com.tw/icon/n503.png','tw_202':'https://tvking.funorange.com.tw/icon/616.png','tw_278':'https://tvking.funorange.com.tw/icon/n137.jpg','tw_276':'https://tvking.funorange.com.tw/icon/276.png','tw_14':'https://tvking.funorange.com.tw/icon/266.png','tw_21':'https://tvking.funorange.com.tw/icon/n61.png','tw_19':'https://tvking.funorange.com.tw/icon/n58.png','tw_205':'https://tvking.funorange.com.tw/icon/254.png','tw_204':'https://tvking.funorange.com.tw/icon/253.png','tw_435':'https://tvking.funorange.com.tw/icon/255.png','tw_256':'https://tvking.funorange.com.tw/icon/256.png','tw_72':'https://tvking.funorange.com.tw/icon/n66.png','tw_171':'https://tvking.funorange.com.tw/icon/105.png','tw_25':'https://tvking.funorange.com.tw/icon/n64.png','tw_175':'https://tvking.funorange.com.tw/icon/107.png','tw_170':'https://tvking.funorange.com.tw/icon/106.png','tw_23':'https://tvking.funorange.com.tw/icon/n148.png','tw_104':'https://tvking.funorange.com.tw/icon/n75.png','tw_116':'https://tvking.funorange.com.tw/icon/521.png','tw_90':'https://tvking.funorange.com.tw/icon/n77.png','tw_111':'https://tvking.funorange.com.tw/icon/009.png','tw_15':'https://tvking.funorange.com.tw/icon/015.png','tw_131':'https://tvking.funorange.com.tw/icon/n580.png','tw_237':'https://tvking.funorange.com.tw/icon/208.png','tw_210':'https://tvking.funorange.com.tw/icon/217.png','tw_238':'https://tvking.funorange.com.tw/icon/209.png','tw_142':'https://tvking.funorange.com.tw/icon/200.png','tw_144':'https://tvking.funorange.com.tw/icon/202.png','tw_143':'https://tvking.funorange.com.tw/icon/201.png','tw_98':'https://tvking.funorange.com.tw/icon/557.png','tw_301':'https://tvking.funorange.com.tw/icon/301.png','tw_88':'https://tvking.funorange.com.tw/icon/350.png','tw_415':'https://tvking.funorange.com.tw/icon/561.png','tw_22':'https://tvking.funorange.com.tw/icon/n65.png','tw_1':'https://tvking.funorange.com.tw/icon/355.png','tw_2103':'https://tvking.funorange.com.tw/icon/300.png','tw_119':'https://tvking.funorange.com.tw/icon/614.png','tw_97':'https://tvking.funorange.com.tw/icon/520.jpeg','tw_491':'https://tvking.funorange.com.tw/icon/332.jpeg','tw_194':'https://tvking.funorange.com.tw/icon/104.png','tw_193':'https://tvking.funorange.com.tw/icon/352.png','tw_195':'https://tvking.funorange.com.tw/icon/353.png','tw_197':'https://tvking.funorange.com.tw/icon/354.png','tw_196':'https://tvking.funorange.com.tw/icon/611.png','tw_441':'https://tvking.funorange.com.tw/icon/615.png','tw_198':'https://tvking.funorange.com.tw/icon/624.png','tw_309':'https://tvking.funorange.com.tw/icon/309.png','tw_265':'https://tvking.funorange.com.tw/icon/265.jpeg','tw_412':'https://tvking.funorange.com.tw/icon/279.jpeg','tw_87':'https://tvking.funorange.com.tw/icon/358.jpeg','tw_169':'https://tvking.funorange.com.tw/icon/372.jpeg','tw_261':'https://tvking.funorange.com.tw/icon/600.jpeg','tw_125':'https://tvking.funorange.com.tw/icon/610.jpeg','tw_191':'https://tvking.funorange.com.tw/icon/629.jpeg','tw_192':'https://tvking.funorange.com.tw/icon/630.jpeg' };
-function channelLogo(ch,rid){
-  if(rid==='tw')return TW_LOGO[ch.id]||'';
-  if(rid==='us'){const s=US_SLUG[ch.id];return s?US_LOGO_BASE+s+'.png':'';}
-  return '';
-}
 
-// ═══ NAVIGATION ═══════════════════════════════════════════
-function regionCount(rid){
-  return (CHANNELS[rid]||[]).length;
-}
-
-function renderRegionMenu(){
-  const menu=document.getElementById('regionMenu');
-  if(!menu)return;
-  menu.innerHTML=Object.entries(REGIONS).map(([rid,r])=>`
-    <button class="region-option${rid===curRegion?' active':''}" onclick="pickRegion('${rid}')" role="option" aria-selected="${rid===curRegion}">
-      <span class="flag-mini">${r.flag}</span>
-      <span class="name">${r.name}</span>
-      <span class="count">${regionCount(rid)}</span>
-    </button>
-  `).join('');
-}
-
-function updateRegionSelector(rid){
-  const r=REGIONS[rid];
-  if(!r)return;
-  document.getElementById('regionSelect')?.classList.add('show');
-  document.getElementById('regionFlag').textContent=r.flag;
-  document.getElementById('regionName').textContent=r.name;
-  document.getElementById('regionCount').textContent=`${regionCount(rid)} 個頻道`;
-  renderRegionMenu();
-}
-
-function toggleRegionMenu(e){
-  e.stopPropagation();
-  const menu=document.getElementById('regionMenu');
-  const trigger=document.getElementById('regionTrigger');
-  const open=!menu.classList.contains('open');
-  menu.classList.toggle('open',open);
-  trigger.classList.toggle('open',open);
-  trigger.setAttribute('aria-expanded',open?'true':'false');
-}
-
-function closeRegionMenu(){
-  document.getElementById('regionMenu')?.classList.remove('open');
-  const trigger=document.getElementById('regionTrigger');
-  trigger?.classList.remove('open');
-  trigger?.setAttribute('aria-expanded','false');
-}
-
-function pickRegion(rid){
-  closeRegionMenu();
-  openRegion(rid);
-}
-
-document.addEventListener('click',closeRegionMenu);
-
-function goHome(){
-  curRegion=null;
-  document.getElementById('backBtn').classList.remove('show');
-  document.getElementById('regionSelect')?.classList.remove('show');
-  document.getElementById('hdrTitle').textContent='📺 電視節目表';
-  document.getElementById('hdrSub').textContent='選擇地區查看節目';
-  document.getElementById('pageHome').classList.add('active');
-  document.getElementById('pageEPG').classList.remove('active');
-  document.getElementById('catBar')?.classList.remove('show');
-  closeDetail();
-}
-
-function openRegion(rid){
-  curRegion=rid;
-  curCat='all';
-  const r=REGIONS[rid];
-  document.getElementById('backBtn').classList.add('show');
-  updateRegionSelector(rid);
-  const tzLabel=rid==='us'?` (${usTzLabel})`:'';
-  document.getElementById('hdrTitle').textContent=r.name;
-  document.getElementById('hdrSub').textContent=`當地時間 ${localTimeStr(rid)}${tzLabel}`;
-  document.getElementById('pageHome').classList.remove('active');
-  document.getElementById('pageEPG').classList.add('active');
-  // Show TZ pills only for US
-  const pills=document.getElementById('tzPills');
-  const label=document.getElementById('chGapLabel');
-  if(rid==='us'){pills.classList.add('show');if(label)label.style.display='none';}
-  else{pills.classList.remove('show');if(label)label.style.display='';}
-  clearFilter();
-  buildEPG(rid);
-  selChIdx=0;
-  selectChannel(0);
-}
-
-// ═══ EPG BUILD ════════════════════════════════════════════
-function buildEPG(rid){
-  const channels=CHANNELS[rid]||[];
-  const {totalMin:nowMin}=localNow(rid);
-  // For regions with a real-data source, start channels hidden and reveal
-  // each one only after live program data arrives.
-  const realOnly=(rid==='us'||rid==='tw');
-
-  // Time header
-  const slotsEl=document.getElementById('timeSlots');
-  slotsEl.innerHTML='';
-  for(let h=GRID_S;h<GRID_E;h++){
-    for(let half=0;half<2;half++){
-      const d=document.createElement('div');
-      d.className='ts'+(half===0?' h0':'');
-      d.style.width=SLOT_W+'px';
-      d.textContent=half===0?`${pad(h%24)}:00`:`${pad(h%24)}:30`;
-      slotsEl.appendChild(d);
-    }
-  }
-
-  // Channel sidebar
-  const sidebar=document.getElementById('chSidebar');
-  sidebar.innerHTML='';
-  channels.forEach((ch,i)=>{
-    const sched=buildSchedule(ch.id,rid);
-    const nowRelMin=nowMin-GRID_S*60;
-    const cur=sched.find(s=>s.startMin<=nowRelMin&&s.startMin+s.dur>nowRelMin);
-    const div=document.createElement('div');
-    div.className='ch-cell'+(realOnly?' nodata':''); div.dataset.idx=i;
-    div.dataset.cat=channelCategory(ch);
-    const logo=channelLogo(ch,rid);
-    const ico=logo
-      ? `<img class="ch-logo" src="${logo}" alt="" loading="lazy" onerror="this.parentElement.classList.add('noimg');this.remove();">`
-      : '';
-    div.innerHTML=`<div class="ch-ico${logo?'':' noimg'}" data-ico="${ch.ico}">${ico}</div>
-      <div class="ch-txt">
-        <div class="ch-n">${ch.n}</div>
-        <div class="ch-np">${cur?cur.title:'—'}</div>
-      </div>
-      <div class="ch-live-dot"></div>`;
-    div.onclick=()=>selectChannel(i);
-    sidebar.appendChild(div);
-  });
-
-  // Program grid
-  const grid=document.getElementById('progGrid');
-  grid.classList.toggle('real-only',realOnly);
-  Array.from(grid.querySelectorAll('.prog-row')).forEach(r=>r.remove());
-  const totalW=(GRID_E-GRID_S)*2*SLOT_W;
-  grid.style.width=totalW+'px';
-  grid.style.minHeight=(channels.length*ROW_H)+'px';
-
-  channels.forEach((ch,i)=>{
-    const sched=buildSchedule(ch.id,rid);
-    const row=document.createElement('div');
-    row.className='prog-row'+(realOnly?' nodata real-row':''); row.dataset.chIdx=i;
-    const nowRelMin=nowMin-GRID_S*60;
-
-    sched.forEach((prog,pi)=>{
-      if(prog.startMin>=(GRID_E-GRID_S)*60)return;
-      const dur=Math.min(prog.dur,(GRID_E-GRID_S)*60-prog.startMin);
-      const w=dur*MIN_PX;
-      const isLive=prog.startMin<=nowRelMin&&prog.startMin+prog.dur>nowRelMin;
-      const isPast=prog.startMin+prog.dur<=nowRelMin;
-
-      const pb=document.createElement('div');
-      pb.className='pb'+(isLive?' live':'')+(isPast?' past':'');
-      pb.style.width=w+'px';
-      pb.dataset.chIdx=i; pb.dataset.progIdx=pi;
-      pb.dataset.start=prog.startMin; // for TVMaze matching
-
-      const sh=pad((GRID_S+Math.floor(prog.startMin/60))%24), sm=pad(prog.startMin%60);
-      const eMin=prog.startMin+prog.dur;
-      const eh=pad((GRID_S+Math.floor(eMin/60))%24), em=pad(eMin%60);
-
-      pb.innerHTML=`<div class="pb-title">${prog.title}</div><div class="pb-time">${sh}:${sm}–${eh}:${em}</div>`;
-
-      if(isLive){
-        const pct=Math.min(100,((nowRelMin-prog.startMin)/prog.dur)*100);
-        const bar=document.createElement('div'); bar.className='pb-bar'; bar.style.width=pct+'%';
-        pb.appendChild(bar);
-        const nb=document.createElement('div'); nb.className='now-badge'; nb.textContent='NOW';
-        pb.appendChild(nb);
-      }
-
-      pb.onclick=(e)=>{
-        e.stopPropagation();
-        selectChannel(i);
-        showDetail(ch,prog,isLive,false);
-        document.querySelectorAll('.pb.sel-prog').forEach(el=>el.classList.remove('sel-prog'));
-        pb.classList.add('sel-prog');
-      };
-      row.appendChild(pb);
-    });
-    grid.appendChild(row);
-  });
-
-  // NOW line
-  const nowX=(nowMin-GRID_S*60)*MIN_PX;
-  document.getElementById('nowLine').style.left=Math.max(0,nowX)+'px';
-
-  // Scroll sync — single source of truth per frame to prevent drift.
-  // The mutual scrollTop assignment used to feed back on itself, so the
-  // sidebar and grid slowly drifted out of alignment while dragging.
-  const progScroll=document.getElementById('progScroll');
-  const timeSlotsWrap=document.getElementById('timeSlotsWrap');
-  const chSidebar=document.getElementById('chSidebar');
-  let vLock=false;
-  const slotsInner=timeSlotsWrap.querySelector('.time-slots');
-  progScroll.onscroll=()=>{
-    slotsInner.style.transform=`translateX(-${progScroll.scrollLeft}px)`;
-    if(vLock)return;
-    vLock=true;
-    chSidebar.scrollTop=progScroll.scrollTop;
-    requestAnimationFrame(()=>{vLock=false;});
-  };
-  chSidebar.onscroll=()=>{
-    if(vLock)return;
-    vLock=true;
-    progScroll.scrollTop=chSidebar.scrollTop;
-    requestAnimationFrame(()=>{vLock=false;});
-  };
-
-  // Scroll to now. On phones, pin "now" to the left edge so past
-  // programs scroll off-screen; on larger screens keep a 1/3 lead-in.
-  requestAnimationFrame(()=>{
-    const viewW=progScroll.clientWidth;
-    const lead=window.innerWidth<=640?8:viewW/3;
-    progScroll.scrollLeft=Math.max(0,nowX-lead);
-  });
-
-  // Category bar + initial visibility
-  renderCatBar(rid);
-  applyChannelVisibility();
-
-  // Fetch live program data
-  if(rid==='us') fetchAllUSData();
-  if(rid==='tw') fetchTWData();
-}
-
-// ═══ TVMAZE INTEGRATION ═══════════════════════════════════
-// TVMaze network → channel ID for Taiwan
-const TVMAZE_MAP_TW = {
-  'FTV':            'tw_6',
-  'TTV':            'tw_8',
-  'CTV':            'tw_10',
-  'CTS':            'tw_12',
-  'PTS':            'tw_13',
-  'SET':            'tw_29',
-  'SET TV':         'tw_30',
-  'TVBS':           'tw_54',
-  'TVBS News':      'tw_55',
-  'TVBS-G':         'tw_42',
-  'EBC':            'tw_32',
-  'EBC Yoyo':       'tw_25',
-  'CTi TV':         'tw_36',
-  'CTi News':       'tw_52',
-  'Sanlih E-Television': 'tw_29',
-  'Formosa TV':     'tw_6',
-  'Taiwan Television': 'tw_8',
-  'China Television': 'tw_10',
-  'Public Television Service': 'tw_13',
-};
-
-// ═══ TVKING.FUNORANGE.COM.TW INTEGRATION (Taiwan) ════════════════
-// TvGo channel id → our tw_* channel id
 const TW_TVGO = {
   // 綜合/娛樂
   1:'tw_28', 2:'tw_27', 3:'tw_118', 4:'tw_44', 5:'tw_29', 6:'tw_30',
@@ -1732,195 +728,6 @@ const TW_TVGO = {
   362:'tw_261', 364:'tw_125', 365:'tw_191', 366:'tw_192',
 };
 
-const TWTVGO_CACHE = {};
-
-function _parseTWSchedule(html){
-  const today=new Date().toISOString().split('T')[0];
-  const idx=html.indexOf(`"date":"${today}"`);
-  if(idx<0)return[];
-  const chunk=html.substring(idx);
-  const plIdx=chunk.indexOf('"programList":[');
-  if(plIdx<0)return[];
-  // Bracket-match to extract the array
-  let depth=0,start=-1,end=0;
-  for(let i=plIdx;i<chunk.length;i++){
-    const c=chunk[i];
-    if(c==='['){if(start<0)start=i;depth++;}
-    else if(c===']'){depth--;if(depth===0){end=i;break;}}
-  }
-  if(start<0||end===0)return[];
-  try{
-    const arr=JSON.parse(chunk.substring(start,end+1));
-    return arr.filter(p=>p.timeS&&p.timeE&&p.program&&p.program!=='ads')
-              .map(p=>({
-                name:p.program,
-                gridMin:_twTimeGrid(p.timeS),
-                endMin: _twTimeGrid(p.timeE),
-              }));
-  }catch{return[];}
-}
-
-function _twTimeGrid(t){
-  const parts=t.split(':');
-  return parseInt(parts[0])*60+parseInt(parts[1])-GRID_S*60;
-}
-
-function _fitVerifiedBlock(sourcePb,rid,chIdx,prog){
-  const row=document.querySelector(`.prog-row[data-ch-idx="${chIdx}"]`);
-  if(!row||!sourcePb)return;
-  const channels=CHANNELS[rid]||[];
-  const ch=channels[chIdx];
-  if(!ch)return;
-  const gridMin=prog.gridMin;
-  let dur=prog.dur||60;
-  if(dur<=0)dur+=24*60;
-  const maxDur=(GRID_E-GRID_S)*60-gridMin;
-  dur=Math.max(5,Math.min(dur,maxDur));
-  const nowRel=localNow(rid).totalMin-GRID_S*60;
-  const isLive=gridMin<=nowRel&&gridMin+dur>nowRel;
-  const isPast=gridMin+dur<=nowRel;
-  const endMin=gridMin+dur;
-  const sh=pad((GRID_S+Math.floor(gridMin/60))%24),sm2=pad(gridMin%60);
-  const eh=pad((GRID_S+Math.floor(endMin/60))%24),em=pad(endMin%60);
-  const title=prog.name+(prog.epName&&prog.epName!==prog.name?` · ${prog.epName}`:'');
-  const realKey=`${rid}|${chIdx}|${gridMin}|${dur}|${title}`;
-  const existing=[...row.querySelectorAll('.pb.verified.real-fit')].find(el=>el.dataset.realKey===realKey);
-  if(existing)return;
-  const collides=[...row.querySelectorAll('.pb.verified.real-fit')].some(el=>{
-    const s=Number(el.dataset.start||0);
-    const e=s+Number(el.dataset.dur||0);
-    return Math.max(s,gridMin)<Math.min(e,endMin)-1;
-  });
-  if(collides)return;
-  const pb=document.createElement('div');
-
-  pb.className='pb verified real-fit'+(dur<20?' tight':'')+(isLive?' live':'')+(isPast?' past':'');
-  pb.style.left=(gridMin*MIN_PX)+'px';
-  pb.style.width=(dur*MIN_PX)+'px';
-  pb.style.position='absolute';
-  pb.style.top='0';
-  pb.style.bottom='0';
-  pb.dataset.chIdx=chIdx;
-  pb.dataset.start=gridMin;
-  pb.dataset.dur=dur;
-  pb.dataset.realKey=realKey;
-  pb.innerHTML=`<div class="pb-title">${title}</div><div class="pb-time">${sh}:${sm2}–${eh}:${em}</div>`;
-  if(isLive){
-    const pct=Math.min(100,Math.max(0,((nowRel-gridMin)/dur)*100));
-    const bar=document.createElement('div'); bar.className='pb-bar'; bar.style.width=pct+'%';
-    pb.appendChild(bar);
-    const nb=document.createElement('div'); nb.className='now-badge'; nb.textContent='NOW';
-    pb.appendChild(nb);
-  }
-  const badge=document.createElement('div');
-  badge.className='verified-badge'; badge.textContent='✓ LIVE DATA';
-  pb.appendChild(badge);
-  pb.onclick=(e)=>{
-    e.stopPropagation();
-    selectChannel(chIdx);
-    showDetailFromVerified(ch,{gridMin,dur,name:prog.name,epName:prog.epName||'',desc:prog.desc||DESCS.news,type:prog.type||'live'});
-    document.querySelectorAll('.pb.sel-prog').forEach(el=>el.classList.remove('sel-prog'));
-    pb.classList.add('sel-prog');
-  };
-  row.appendChild(pb);
-}
-
-function _applyTWProgs(chIdx,progs){
-  const row=document.querySelector(`.prog-row[data-ch-idx="${chIdx}"]`);
-  if(!row)return;
-  const pbs=Array.from(row.querySelectorAll('.pb'));
-  progs.forEach(prog=>{
-    const gridMin=prog.gridMin;
-    if(gridMin<0||gridMin>=(GRID_E-GRID_S)*60)return;
-    let dur=prog.endMin-gridMin;
-    if(dur<=0)dur+=24*60;
-    for(const pb of pbs){
-      const pbStart=parseInt(pb.dataset.start||0);
-      const pbEnd=pbStart+parseFloat(pb.style.width||0)/MIN_PX;
-      if(gridMin>=pbStart&&gridMin<pbEnd){
-        _fitVerifiedBlock(pb,'tw',chIdx,{...prog,dur});
-        const chCell=document.querySelector(`.ch-cell[data-idx="${chIdx}"]`);
-        if(chCell){
-          const nowRel=localNow('tw').totalMin-GRID_S*60;
-          if(gridMin<=nowRel&&gridMin+dur>nowRel){
-            const np=chCell.querySelector('.ch-np');
-            if(np)np.textContent=prog.name;
-          }
-        }
-        break;
-      }
-    }
-  });
-  // Reveal this channel if it received any real data
-  if(row.querySelector('.pb.verified')){
-    row.classList.remove('nodata');
-    document.querySelector(`.ch-cell[data-idx="${chIdx}"]`)?.classList.remove('nodata');
-  }
-}
-
-// Shared CORS proxy: codetabs bypasses Cloudflare; allorigins as fallback.
-async function _proxyGet(targetUrl){
-  const enc=encodeURIComponent(targetUrl);
-  // 1. codetabs (raw passthrough, bypasses Cloudflare)
-  try{
-    const r=await fetch(`https://api.codetabs.com/v1/proxy/?quest=${enc}`,{signal:AbortSignal.timeout(12000)});
-    if(r.ok){
-      const t=await r.text();
-      if(t&&!t.includes('Just a moment'))return t;
-    }
-  }catch(e){}
-  // 2. allorigins (JSON-wrapped fallback)
-  try{
-    const r=await fetch(`https://api.allorigins.win/get?url=${enc}`,{signal:AbortSignal.timeout(12000)});
-    if(r.ok){
-      const j=await r.json();
-      if(j.contents&&!j.contents.includes('Just a moment'))return j.contents;
-    }
-  }catch(e){}
-  throw new Error('proxy failed');
-}
-
-async function _fetchTWChannel(tvgoId){
-  if(TWTVGO_CACHE[tvgoId])return TWTVGO_CACHE[tvgoId];
-  const html=await _proxyGet(`https://tvking.funorange.com.tw/channel/${tvgoId}`);
-  const progs=_parseTWSchedule(html);
-  TWTVGO_CACHE[tvgoId]=progs;
-  return progs;
-}
-
-async function fetchTWData(){
-  const channels=CHANNELS.tw;
-  // Build tvgoId → [chIdx] map
-  const idMap={};
-  Object.entries(TW_TVGO).forEach(([tvgoId,twId])=>{
-    const idx=channels.findIndex(c=>c.id===twId);
-    if(idx<0)return;
-    if(!idMap[tvgoId])idMap[tvgoId]=[];
-    idMap[tvgoId].push(idx);
-  });
-  const entries=Object.entries(idMap);
-  const BATCH=6;
-  let loaded=0;
-  const hdrSub=document.getElementById('hdrSub');
-  for(let i=0;i<entries.length;i+=BATCH){
-    const batch=entries.slice(i,i+BATCH);
-    await Promise.all(batch.map(async([tvgoId,indices])=>{
-      try{
-        const progs=await _fetchTWChannel(parseInt(tvgoId));
-        indices.forEach(idx=>_applyTWProgs(idx,progs));
-        loaded++;
-        if(hdrSub&&curRegion==='tw')
-          hdrSub.textContent=`載入節目資料中… ${loaded}/${entries.length}`;
-      }catch(e){
-        console.warn('twtvgo',tvgoId,e.message);
-      }
-    }));
-  }
-  if(hdrSub&&curRegion==='tw')
-    hdrSub.textContent=`當地時間 ${localTimeStr('tw')} · 節目資料已更新`;
-}
-
-// ═══ US-TV-GUIDE.COM INTEGRATION ══════════════════════════════════
 const US_SLUG = {
   'us02':'cnn',              'us05':'fox-news-channel',     'us06':'fox-business-network',
   'us08':'hbo',              'us09':'hbo',                  'us10':'travel-channel',
@@ -1959,255 +766,366 @@ const US_SLUG = {
   'us142':'starz-edge',      'us143':'starz-kids-family',   'us144':'starz-encore',
 };
 
-const USTV_CACHE = {};
+/* ===== TV Guide — view layer (vanilla port of design doc) ===== */
+// Reuses data literals already defined above: CHANNELS, TW_LOGO, TW_TVGO, US_SLUG.
+const REGIONS = {
+  tw:{ name:'台灣',     flag:'🇹🇼', tz:'Asia/Taipei',     off:8  },
+  hk:{ name:'香港',     flag:'🇭🇰', tz:'Asia/Hong_Kong',  off:8  },
+  cn:{ name:'中國大陸', flag:'🇨🇳', tz:'Asia/Shanghai',   off:8  },
+  us:{ name:'美國',     flag:'🇺🇸', tz:'America/New_York',off:-4 },
+  jp:{ name:'日本',     flag:'🇯🇵', tz:'Asia/Tokyo',      off:9  },
+  uk:{ name:'英國',     flag:'🇬🇧', tz:'Europe/London',   off:1  },
+  kr:{ name:'韓國',     flag:'🇰🇷', tz:'Asia/Seoul',      off:9  },
+  th:{ name:'泰國',     flag:'🇹🇭', tz:'Asia/Bangkok',    off:7  },
+};
 
-function _parseDur(s){
-  let m=0;
-  const h=s.match(/(\d+)h/); if(h)m+=parseInt(h[1])*60;
-  const n=s.match(/(\d+)m/); if(n)m+=parseInt(n[1]);
-  return m||60;
+const GRID_START = 300;      // 05:00 in minutes
+const GRID_END   = 1560;     // 26:00 (02:00 next day)
+const PX_MIN     = 4;
+const ROW_H      = 78;
+const RAIL_W     = 210;
+const US_LOGO_BASE = 'https://us-tv-guide.com/logos/';
+
+const CATEGORIES = [
+  { key:'all',     label:'全部',     color:null },
+  { key:'news',    label:'新聞',     color:'#E0533D' },
+  { key:'finance', label:'財經',     color:'#C98A1B' },
+  { key:'variety', label:'綜合娛樂', color:'#3B82C4' },
+  { key:'drama',   label:'戲劇',     color:'#C2497E' },
+  { key:'movie',   label:'電影',     color:'#7A5AE0' },
+  { key:'sports',  label:'體育',     color:'#1F9E6E' },
+  { key:'kids',    label:'兒童',     color:'#E68A2E' },
+  { key:'docu',    label:'知識紀實', color:'#2B8C8C' },
+  { key:'faith',   label:'宗教',     color:'#8A7A5C' },
+];
+const CAT_MAP = Object.fromEntries(CATEGORIES.map(c => [c.key, c]));
+const REGION_LIST = ['tw','hk','cn','us','jp','uk','kr','th'].map(k => ({
+  key:k, name:REGIONS[k].name, flag:REGIONS[k].flag, off:REGIONS[k].off, tz:REGIONS[k].tz,
+  count:(CHANNELS[k]||[]).length,
+}));
+
+// ── category by channel name (bilingual keyword match) ──
+const CH_CAT_CACHE = {};
+function channelCategory(ch){
+  if(CH_CAT_CACHE[ch.id]) return CH_CAT_CACHE[ch.id];
+  const n = ch.n || '';
+  const has = (...a) => a.some(k => n.toLowerCase().includes(k.toLowerCase()));
+  let c;
+  if(has('好消息','大愛','佛','慈悲','法界','唯心','信吉','華藏','正德','三聖','天美麗','新天地','福音','人間衛視','十方','佛衛','GOOD TV','EWTN','Daystar','TBN','Word Network','Inspiration','Catholic')) c='faith';
+  else if(has('財經','商業','Bloomberg','CNBC','非凡','Fox Business','股','運通財經','全球財經','第1商業','寰宇財經')) c='finance';
+  else if(has('體育','運動','Sport','ESPN','球','博斯','NBA','NFL','MLB','NHL','Golf','Tennis','Eleven','DAZN','UFC','WWE','Fight','beIN','SEC','ACC','Big Ten','TVG','Racing','Outdoor','Fishing','GolTV','智林','FanDuel','Marquee','BYU','Sportsman')) c='sports';
+  else if(has('新聞','News','CNN','BBC','MSNBC','Fox News','寰宇','年代','Newsmax','半島','Al Jazeera','i24','Euronews','France','德國之聲','DW','鏡電視','TaiwanPlus','C-SPAN','NewsNation','HLN','NHK','Arirang','CGTN','NewsAsia','ETtoday','First TV','People TV','Right Now','Law & Crime','國會頻道')) c='news';
+  else if(has('卡通','親子','幼','兒童','童','YOYO','MOMO親子','momo親子','Nick','Disney','Cartoon','Boomerang','Baby','Kids','尼克','ELTV','Animax','CBeebies','DreamWorks','Cartoonito','龍華動畫','Universal Kids','達文西')) c='kids';
+  else if(has('探索','國家地理','動物','Discovery','Nat Geo','National Geographic','Smithsonian','History','歷史','紀實','知識','科學','Science','Animal','BBC Earth','BBC Lifestyle','DMAX','EVE','旅遊','美食','Travel','Food','TLC','Lifestyle','麥哲倫','視納華仁','HGTV','居家','幸福空間','Luxe','Magnolia','Cooking','DIY','FYI','Destination','American Heroes','Military','Investigation','Nature','Pet','Earth')) c='docu';
+  else if(has('電影','影城','片','Movie','Cinema','HBO','MAX','Cinemax','Starz','MGM','TMC','Flix','Showtime','采昌','美亞','影迷','Warner','天映','Hollywood','好萊塢','龍華電影','龍華洋片','AXN','FOX MOVIE','Encore','Sundance','IFC','TCM','Turner Classic','Comet','映畫')) c='movie';
+  else if(has('戲劇','劇','Drama','偶像','韓劇')) c='drama';
+  else c='variety';
+  CH_CAT_CACHE[ch.id]=c; return c;
+}
+function channelLogoUrl(ch,rid){
+  if(rid==='tw') return TW_LOGO[ch.id] || '';
+  if(rid==='us'){ const s=US_SLUG[ch.id]; return s ? US_LOGO_BASE+s+'.png' : ''; }
+  return '';
+}
+function logoText(ch){ const n=ch.n||''; return /[A-Za-z]/.test(n[0]||'') ? n.slice(0,4) : n.slice(0,2); }
+
+// ── time helpers ──
+function pad(n){ return String(n).padStart(2,'0'); }
+function fmtMin(m){ m=((m%1440)+1440)%1440; return pad(Math.floor(m/60))+':'+pad(m%60); }
+
+// ── proxy (codetabs primary, allorigins fallback) ──
+async function proxyGet(targetUrl){
+  const enc=encodeURIComponent(targetUrl);
+  try{ const r=await fetch(`https://api.codetabs.com/v1/proxy/?quest=${enc}`,{signal:AbortSignal.timeout(12000)});
+    if(r.ok){ const t=await r.text(); if(t&&!t.includes('Just a moment')) return t; } }catch(e){}
+  try{ const r=await fetch(`https://api.allorigins.win/get?url=${enc}`,{signal:AbortSignal.timeout(12000)});
+    if(r.ok){ const j=await r.json(); if(j.contents&&!j.contents.includes('Just a moment')) return j.contents; } }catch(e){}
+  throw new Error('proxy failed');
 }
 
-function _parseUSTVHtml(html){
-  const progs=[];
-  const parts=html.split(/(?=<div class="show-row")/);
+// ── US parser → [{start,end,name}] absolute grid minutes ──
+function _dur(s){ let m=0; const h=s.match(/(\d+)h/); if(h)m+=+h[1]*60; const n=s.match(/(\d+)m/); if(n)m+=+n[1]; return m||60; }
+function parseUSPrograms(html, tzOff){
+  const out=[]; const parts=html.split(/(?=<div class="show-row")/);
   for(const part of parts){
-    if(!part.includes('show-row'))continue;
-    const tsM=part.match(/data-ts="(\d+)"/);
-    const durM=part.match(/class="time-dur">([^<]+)</);
-    const nameM=part.match(/class="show-title-link[^"]*"[^>]*>\s*([^<]+?)\s*</);
-    if(!tsM||!nameM)continue;
-    progs.push({tsMs:parseInt(tsM[1])*1000,dur:_parseDur(durM?durM[1]:'1h'),name:nameM[1].trim()});
+    if(!part.includes('show-row')) continue;
+    const ts=part.match(/data-ts="(\d+)"/); const du=part.match(/class="time-dur">([^<]+)</);
+    const nm=part.match(/class="show-title-link[^"]*"[^>]*>\s*([^<]+?)\s*</);
+    if(!ts||!nm) continue;
+    const d=new Date((+ts[1])*1000 + tzOff*3600000);
+    let start=d.getUTCHours()*60+d.getUTCMinutes(); if(d.getUTCHours()<5) start+=1440;
+    out.push({ start, end:start+_dur(du?du[1]:'1h'), name:nm[1].trim() });
   }
-  return progs;
+  return out;
+}
+// ── TW parser → [{start,end,name}] absolute grid minutes ──
+function parseTWPrograms(html){
+  const today=new Date().toISOString().split('T')[0];
+  const idx=html.indexOf(`"date":"${today}"`); if(idx<0) return [];
+  const chunk=html.substring(idx); const pl=chunk.indexOf('"programList":['); if(pl<0) return [];
+  let depth=0,start=-1,end=0;
+  for(let i=pl;i<chunk.length;i++){ const c=chunk[i];
+    if(c==='['){ if(start<0)start=i; depth++; } else if(c===']'){ depth--; if(depth===0){ end=i; break; } } }
+  if(start<0||!end) return [];
+  let arr; try{ arr=JSON.parse(chunk.substring(start,end+1)); }catch(e){ return []; }
+  const toMin=t=>{ const p=t.split(':'); let m=(+p[0])*60+(+p[1]); if(+p[0]<5) m+=1440; return m; };
+  return arr.filter(p=>p.timeS&&p.timeE&&p.program&&p.program!=='ads').map(p=>{
+    let s=toMin(p.timeS), e=toMin(p.timeE); if(e<=s) e+=1440;
+    return { start:s, end:e, name:p.program };
+  });
 }
 
-function _applyUSProgs(chIdx,progs){
-  const row=document.querySelector(`.prog-row[data-ch-idx="${chIdx}"]`);
-  if(!row)return;
-  const pbs=Array.from(row.querySelectorAll('.pb'));
-  const channels=CHANNELS.us;
-  progs.forEach(prog=>{
-    const localMs=prog.tsMs+usTzOff*3600000;
-    const d=new Date(localMs);
-    const h=d.getUTCHours(),m=d.getUTCMinutes();
-    const gridMin=h*60+m-GRID_S*60;
-    if(gridMin<0||gridMin>=(GRID_E-GRID_S)*60)return;
-    for(const pb of pbs){
-      const pbStart=parseInt(pb.dataset.start||0);
-      const pbEnd=pbStart+parseFloat(pb.style.width||0)/MIN_PX;
-      if(gridMin>=pbStart&&gridMin<pbEnd){
-        _fitVerifiedBlock(pb,'us',chIdx,{...prog,gridMin});
-        // Update sidebar now-playing
-        const chCell=document.querySelector(`.ch-cell[data-idx="${chIdx}"]`);
-        if(chCell){
-          const nowRel=localNow('us').totalMin-GRID_S*60;
-          if(gridMin<=nowRel&&endMin>nowRel){
-            const np=chCell.querySelector('.ch-np');
-            if(np)np.textContent=prog.name;
-          }
-        }
-        break;
-      }
-    }
-  });
-  // Reveal this channel if it received any real data
-  if(row.querySelector('.pb.verified')){
-    row.classList.remove('nodata');
-    document.querySelector(`.ch-cell[data-idx="${chIdx}"]`)?.classList.remove('nodata');
+// ===== App state =====
+const ST = { region:null, cat:'all', query:'', usTzOff:-4, usTzLabel:'ET', progs:{}, nowTimer:null };
+const USTV_CACHE={}, TWTVGO_CACHE={};
+const root=document.getElementById('root');
+
+function nowMinFor(rid){
+  const r=REGIONS[rid];
+  if(rid!=='us'){
+    try{ const s=new Date().toLocaleString('en-US',{timeZone:r.tz,hour:'2-digit',minute:'2-digit',hour12:false});
+      const [h,m]=s.split(':').map(Number); let mm=h*60+m; if(h<5)mm+=1440; return mm; }catch(e){}
   }
+  const utc=Date.now()+new Date().getTimezoneOffset()*60000;
+  const d=new Date(utc+ST.usTzOff*3600000); let mm=d.getHours()*60+d.getMinutes(); if(d.getHours()<5)mm+=1440; return mm;
+}
+function clockStr(){ const n=new Date(); return pad(n.getHours())+':'+pad(n.getMinutes())+':'+pad(n.getSeconds()); }
+function dateStr(){ return new Date().toLocaleDateString('zh-TW',{month:'long',day:'numeric',weekday:'long'}); }
+
+const SVG_BACK='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
+const SVG_TV='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="3"/><path d="M8 21h8M12 18v3"/></svg>';
+const SVG_GO='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+const SVG_SEARCH='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>';
+
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+// ===== Region select =====
+function renderRegions(){
+  if(ST.nowTimer){ clearInterval(ST.nowTimer); ST.nowTimer=null; }
+  ST.region=null;
+  const total=REGION_LIST.reduce((a,r)=>a+r.count,0);
+  root.innerHTML=`
+  <div class="tvg-root"><div class="rs-root">
+    <header class="appbar"><div class="appbar-left">
+      <div class="appbar-icon">${SVG_TV}</div>
+      <div><h1 class="appbar-title">電視節目表</h1><p class="appbar-sub">選擇地區查看節目</p></div>
+    </div><div class="appbar-right"><div class="clock" id="clock">${clockStr()}</div><div class="datelabel">${dateStr()}</div></div></header>
+    <main class="rs-main">
+      <div class="rs-sectionhead"><span class="rs-eyebrow">選擇地區</span>
+        <span class="rs-hint">${REGION_LIST.length} 個地區 · 共 ${total} 個頻道</span></div>
+      <div class="rs-grid">${REGION_LIST.map(r=>`
+        <button class="rs-card" data-rid="${r.key}">
+          <span class="rs-flagtile">${r.flag}</span>
+          <span class="rs-cardbody"><span class="rs-name">${r.name}</span>
+            <span class="rs-count">${r.count} 個頻道</span></span>
+          <span class="rs-go">${SVG_GO}</span>
+        </button>`).join('')}</div>
+    </main></div></div>`;
+  root.querySelectorAll('.rs-card').forEach(b=>b.onclick=()=>openRegion(b.dataset.rid));
+  startClock();
+}
+function startClock(){ if(ST._clk)clearInterval(ST._clk);
+  ST._clk=setInterval(()=>{ const el=document.getElementById('clock'); if(el)el.textContent=clockStr(); },1000); }
+
+// ===== EPG screen =====
+function openRegion(rid){
+  ST.region=rid; ST.cat='all'; ST.query=''; ST.progs={};
+  const r=REGIONS[rid];
+  const channels=CHANNELS[rid]||[];
+  const realOnly=(rid==='us'||rid==='tw');
+  const totalW=(GRID_END-GRID_START)*PX_MIN;
+
+  // category counts (whole region)
+  const counts={ all:channels.length };
+  channels.forEach(ch=>{ const c=channelCategory(ch); counts[c]=(counts[c]||0)+1; });
+
+  const ticks=[]; for(let m=GRID_START;m<=GRID_END;m+=30) ticks.push(m);
+
+  root.innerHTML=`
+  <div class="tvg-root"><div class="epg" style="--row-h:${ROW_H}px;--rail-w:${RAIL_W}px;--total-w:${totalW}px">
+    <header class="appbar"><div class="appbar-left">
+      <button class="backbtn" id="backBtn" aria-label="返回">${SVG_BACK}</button>
+      <span class="appbar-flag">${r.flag}</span>
+      <div><h1 class="appbar-title">${r.name}</h1>
+        <p class="appbar-sub" id="epgSub">當地時間 ${fmtMin(nowMinFor(rid))}${rid==='us'?' ('+ST.usTzLabel+')':''} · ${channels.length} 個頻道</p></div>
+      <div class="tzpills${rid==='us'?' show':''}" id="tzPills">
+        ${[['ET',-4],['CT',-5],['MT',-6],['PT',-7]].map(([l,o])=>`<button class="tzpill${o===ST.usTzOff?' is-active':''}" data-off="${o}" data-lbl="${l}">${l}</button>`).join('')}
+      </div>
+    </div><div class="appbar-right"><div class="clock" id="clock">${clockStr()}</div><div class="datelabel">${dateStr()}</div></div></header>
+
+    <div class="epg-filters">
+      <div class="chips" id="chips">${CATEGORIES.filter(c=>c.key==='all'||counts[c.key]).map(c=>`
+        <button class="chip${c.key==='all'?' is-active':''}" data-cat="${c.key}" style="--chip-accent:${c.color||'var(--accent)'}">
+          ${c.color?'<span class="chip-dot"></span>':''}<span>${c.label}</span><span class="chip-count">${counts[c.key]||0}</span>
+        </button>`).join('')}</div>
+      <div class="searchbox">${SVG_SEARCH}
+        <input id="search" placeholder="搜尋頻道名稱或頻道號" autocomplete="off">
+        <button class="search-clear" id="searchClear" style="display:none">×</button></div>
+    </div>
+
+    <div class="epg-board" id="board"><div class="epg-inner">
+      <div class="epg-axis"><div class="axis-corner"><span class="corner-label">頻道</span>
+        <span class="corner-count" id="visCount">${channels.length}</span></div>
+        <div class="axis-track">${ticks.map(m=>`<div class="tick ${m%60===0?'tick-hour':'tick-half'}" style="left:${(m-GRID_START)*PX_MIN}px"><span>${fmtMin(m)}</span></div>`).join('')}</div>
+      </div>
+      <div class="epg-rows" id="rows">${channels.map((ch,i)=>{
+        const cat=channelCategory(ch); const col=CAT_MAP[cat].color;
+        const logo=channelLogoUrl(ch,rid);
+        const ico=logo?`<img src="${logo}" alt="" loading="lazy" onerror="this.parentElement.textContent='${esc(logoText(ch))}'">`:esc(logoText(ch));
+        return `<div class="epg-row${realOnly?' hidden':''}" data-idx="${i}" data-cat="${cat}">
+          <div class="epg-rail">
+            <span class="ch-logo" style="background:${col}1f;color:${col}">${ico}</span>
+            <div class="rail-text"><span class="rail-name">${esc(ch.n)}</span>
+              <span class="rail-meta"><span class="rail-num">${esc(ch.num)}</span></span></div>
+            <span class="rail-catbar" style="background:${col}"></span>
+          </div>
+          <div class="epg-track" data-track="${i}"></div>
+        </div>`;
+      }).join('')}<div class="epg-empty" id="emptyMsg" style="display:none">沒有符合的頻道</div></div>
+      <div class="now-line" id="nowLine" style="display:none"><span class="now-bubble"></span></div>
+    </div></div>
+  </div></div>`;
+
+  document.getElementById('backBtn').onclick=renderRegions;
+  document.getElementById('chips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ ST.cat=b.dataset.cat;
+    document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('is-active',x===b)); applyFilter(); });
+  const search=document.getElementById('search');
+  search.oninput=()=>{ ST.query=search.value; document.getElementById('searchClear').style.display=search.value?'block':'none'; applyFilter(); };
+  document.getElementById('searchClear').onclick=()=>{ search.value=''; ST.query=''; document.getElementById('searchClear').style.display='none'; applyFilter(); };
+  document.getElementById('tzPills').querySelectorAll('.tzpill').forEach(b=>b.onclick=()=>{
+    ST.usTzOff=+b.dataset.off; ST.usTzLabel=b.dataset.lbl; openRegion('us'); });
+
+  startClock();
+  positionNow();
+  if(ST.nowTimer)clearInterval(ST.nowTimer);
+  ST.nowTimer=setInterval(positionNow,1000);
+
+  // fetch real data
+  if(rid==='us') loadUS(channels);
+  else if(rid==='tw') loadTW(channels);
+  // other regions: channels shown with empty tracks (no real source)
+  if(!realOnly){ root.querySelectorAll('.epg-row').forEach(r=>r.classList.remove('hidden')); }
+
+  // scroll so now sits ~1/3 from left (left edge on phone)
+  requestAnimationFrame(()=>{ const b=document.getElementById('board'); if(!b)return;
+    const nx=(nowMinFor(rid)-GRID_START)*PX_MIN; const lead=window.innerWidth<=640?8:b.clientWidth*0.32;
+    b.scrollLeft=Math.max(0,nx-lead); });
 }
 
-async function _fetchSlug(slug){
-  if(USTV_CACHE[slug])return USTV_CACHE[slug];
-  const html=await _proxyGet(`https://us-tv-guide.com/tv-guide-${slug}/`);
-  const progs=_parseUSTVHtml(html);
-  USTV_CACHE[slug]=progs;
-  return progs;
+function positionNow(){
+  if(!ST.region) return;
+  const line=document.getElementById('nowLine'); if(!line) return;
+  const nm=nowMinFor(ST.region);
+  const sub=document.getElementById('epgSub');
+  if(sub) sub.textContent=`當地時間 ${fmtMin(nm)}${ST.region==='us'?' ('+ST.usTzLabel+')':''} · ${(CHANNELS[ST.region]||[]).length} 個頻道`;
+  const clk=document.getElementById('clock'); if(clk)clk.textContent=clockStr();
+  if(nm<GRID_START||nm>GRID_END){ line.style.display='none'; return; }
+  line.style.display='';
+  line.style.left=`calc(var(--rail-w) + ${(nm-GRID_START)*PX_MIN}px)`;
+  line.querySelector('.now-bubble').textContent=fmtMin(nm);
 }
 
-async function fetchAllUSData(){
-  // Build slug → [chIdx, ...] map (deduplicate slugs)
-  const slugMap={};
-  CHANNELS.us.forEach((ch,idx)=>{
-    const slug=US_SLUG[ch.id];
-    if(!slug)return;
-    if(!slugMap[slug])slugMap[slug]=[];
-    slugMap[slug].push(idx);
+// render programs into a channel track (absolute positioned = true time alignment)
+function fillTrack(idx, programs){
+  const track=root.querySelector(`.epg-track[data-track="${idx}"]`); if(!track) return;
+  const nm=nowMinFor(ST.region);
+  track.innerHTML='';
+  let painted=0;
+  programs.forEach(p=>{
+    if(p.end<=GRID_START||p.start>=GRID_END) return;
+    const s=Math.max(p.start,GRID_START), e=Math.min(p.end,GRID_END);
+    const left=(s-GRID_START)*PX_MIN, width=(e-s)*PX_MIN;
+    const isNow=nm>=p.start&&nm<p.end, isPast=p.end<=nm, tight=width<64;
+    const cell=document.createElement('button');
+    cell.className='cell'+(isNow?' is-now':'')+(isPast?' is-past':'')+(tight?' is-tight':'');
+    cell.style.cssText=`left:${left}px;width:${width-3}px;--cell-accent:var(--accent)`;
+    cell.title=p.name;
+    cell.innerHTML=`<span class="cell-main"><span class="cell-title"><span class="cell-titletext">${esc(p.name)}</span></span>
+      <span class="cell-time">${fmtMin(p.start)}–${fmtMin(p.end)}</span></span>${isNow?'<span class="cell-nowtag">NOW</span>':''}`;
+    cell.onclick=()=>openDetail(idx,p);
+    track.appendChild(cell); painted++;
   });
-  const entries=Object.entries(slugMap);
-  const BATCH=4; // codetabs rate-limits ~5 req/s; keep batches small
-  let loaded=0;
-  const hdrSub=document.getElementById('hdrSub');
-  for(let i=0;i<entries.length;i+=BATCH){
-    const batch=entries.slice(i,i+BATCH);
-    await Promise.all(batch.map(async([slug,indices])=>{
-      try{
-        const progs=await _fetchSlug(slug);
-        indices.forEach(idx=>_applyUSProgs(idx,progs));
-        loaded++;
-        if(hdrSub&&curRegion==='us')
-          hdrSub.textContent=`載入節目資料中… ${loaded}/${entries.length}`;
-      }catch(e){
-        console.warn('ustv',slug,e.message);
-      }
+  if(painted){ const row=root.querySelector(`.epg-row[data-idx="${idx}"]`); if(row){ row.dataset.has='1'; if(matchFilter(row)) row.classList.remove('hidden'); } }
+}
+
+function matchFilter(row){
+  const i=+row.dataset.idx; const ch=CHANNELS[ST.region][i];
+  const catOk=ST.cat==='all'||row.dataset.cat===ST.cat;
+  const q=ST.query.trim().toLowerCase();
+  const qOk=!q||(ch.n||'').toLowerCase().includes(q)||String(ch.num).includes(q);
+  const realOnly=(ST.region==='us'||ST.region==='tw');
+  const dataOk=!realOnly||row.dataset.has==='1';
+  return catOk&&qOk&&dataOk;
+}
+function applyFilter(){
+  let vis=0;
+  root.querySelectorAll('.epg-row').forEach(row=>{ const ok=matchFilter(row); row.classList.toggle('hidden',!ok); if(ok)vis++; });
+  const vc=document.getElementById('visCount'); if(vc)vc.textContent=vis;
+  const em=document.getElementById('emptyMsg'); if(em)em.style.display=vis?'none':'';
+}
+
+// ===== loaders =====
+async function loadUS(channels){
+  const slugMap={}; channels.forEach((ch,i)=>{ const s=US_SLUG[ch.id]; if(!s)return; (slugMap[s]=slugMap[s]||[]).push(i); });
+  const entries=Object.entries(slugMap); const sub=document.getElementById('epgSub'); let done=0;
+  for(let i=0;i<entries.length;i+=4){
+    await Promise.all(entries.slice(i,i+4).map(async([slug,idxs])=>{
+      try{ let html=USTV_CACHE[slug]; if(!html){ html=await proxyGet(`https://us-tv-guide.com/tv-guide-${slug}/`); USTV_CACHE[slug]=html; }
+        const progs=parseUSPrograms(html,ST.usTzOff); // re-parse so TZ switches re-align
+        idxs.forEach(ix=>fillTrack(ix,progs)); done++;
+      }catch(e){}
     }));
-    if(i+BATCH<entries.length)await new Promise(r=>setTimeout(r,250)); // throttle
+    await new Promise(r=>setTimeout(r,200));
   }
-  if(hdrSub&&curRegion==='us')
-    hdrSub.textContent=`當地時間 ${localTimeStr('us')} (${usTzLabel}) · 節目資料已更新`;
+  applyFilter();
 }
-
-async function fetchTVMaze(country='US'){
-  try{
-    const today=new Date().toISOString().split('T')[0];
-    const res=await fetch(`https://api.tvmaze.com/schedule?country=${country}&date=${today}`);
-    if(!res.ok)return;
-    const data=await res.json();
-    applyTVMazeData(data, country);
-  }catch(e){
-    console.warn('TVMaze fetch failed:',e);
+async function loadTW(channels){
+  const idMap={}; Object.entries(TW_TVGO).forEach(([tvgo,twid])=>{ const ix=channels.findIndex(c=>c.id===twid); if(ix>=0)(idMap[tvgo]=idMap[tvgo]||[]).push(ix); });
+  const entries=Object.entries(idMap); let done=0;
+  for(let i=0;i<entries.length;i+=6){
+    await Promise.all(entries.slice(i,i+6).map(async([tvgo,idxs])=>{
+      try{ let progs=TWTVGO_CACHE[tvgo]; if(!progs){ const html=await proxyGet(`https://tvking.funorange.com.tw/channel/${tvgo}`); progs=parseTWPrograms(html); TWTVGO_CACHE[tvgo]=progs; }
+        idxs.forEach(ix=>fillTrack(ix,progs)); done++;
+      }catch(e){}
+    }));
+    await new Promise(r=>setTimeout(r,150));
   }
+  applyFilter();
 }
 
-function applyTVMazeData(items, country='US'){
-  const rid = country==='TW' ? 'tw' : 'us';
-  const map = country==='TW' ? TVMAZE_MAP_TW : TVMAZE_MAP;
-  const channels=CHANNELS[rid];
-  // Group items by channel
-  const byChIdx={};
-
-  items.forEach(item=>{
-    const netName=item.show?.network?.name||item.show?.webChannel?.name||'';
-    const chId=map[netName];
-    if(!chId)return;
-    const chIdx=channels.findIndex(c=>c.id===chId);
-    if(chIdx<0)return;
-
-    // Convert airstamp to local time of the region
-    const tzOff = rid==='us' ? usTzOff : REGIONS[rid].off;
-    let gridMin;
-    try{
-      const utcMs=new Date(item.airstamp).getTime();
-      const localMs=utcMs+tzOff*3600000;
-      const d=new Date(localMs);
-      const h=d.getUTCHours(), m=d.getUTCMinutes();
-      gridMin=h*60+m-GRID_S*60;
-    }catch{return;}
-
-    if(gridMin<0||gridMin>=(GRID_E-GRID_S)*60)return;
-
-    if(!byChIdx[chIdx]) byChIdx[chIdx]=[];
-    byChIdx[chIdx].push({
-      gridMin,
-      dur:item.runtime||60,
-      name:item.show?.name||item.name||'',
-      epName:item.name||'',
-      desc:item.show?.summary?.replace(/<[^>]+>/g,'')||DESCS.news,
-      type:'news',
-    });
-  });
-
-  // Patch DOM
-  Object.entries(byChIdx).forEach(([chIdx,progs])=>{
-    const row=document.querySelector(`.prog-row[data-ch-idx="${chIdx}"]`);
-    if(!row)return;
-    const pbs=Array.from(row.querySelectorAll('.pb'));
-
-    progs.forEach(prog=>{
-      // Find pb that overlaps this program's start
-      let x=0;
-      for(const pb of pbs){
-        const pbStart=parseInt(pb.dataset.start||0);
-        const pbW=parseFloat(pb.style.width||0);
-        const pbDur=pbW/MIN_PX;
-        const pbEnd=pbStart+pbDur;
-        // Overlap check: prog starts within this block
-        if(prog.gridMin>=pbStart&&prog.gridMin<pbEnd){
-          _fitVerifiedBlock(pb,rid,chIdx,prog);
-
-          // Update detail panel if this is currently selected
-          if(pb.classList.contains('sel-prog')){
-            const chIdx2=parseInt(pb.dataset.chIdx);
-            const ch=channels[chIdx2];
-            if(ch) showDetailFromVerified(ch,prog);
-          }
-
-          // Update sidebar current program name
-          const chCell=document.querySelector(`.ch-cell[data-idx="${chIdx}"]`);
-          if(chCell){
-            const nowRelMin=localNow(rid).totalMin-GRID_S*60;
-            if(prog.gridMin<=nowRelMin&&prog.gridMin+prog.dur>nowRelMin){
-              const np=chCell.querySelector('.ch-np');
-              if(np) np.textContent=prog.name;
-            }
-          }
-          break;
-        }
-      }
-    });
-  });
+// ===== Detail drawer =====
+function openDetail(idx,p){
+  const ch=CHANNELS[ST.region][idx]; const cat=channelCategory(ch); const col=CAT_MAP[cat].color;
+  const rid=ST.region; const logo=channelLogoUrl(ch,rid);
+  const ico=logo?`<img src="${logo}" alt="" onerror="this.parentElement.textContent='${esc(logoText(ch))}'">`:esc(logoText(ch));
+  const dur=p.end-p.start; const nm=nowMinFor(rid); const isNow=nm>=p.start&&nm<p.end;
+  const scrim=document.createElement('div'); scrim.className='pd-scrim';
+  scrim.innerHTML=`<aside class="pd-panel">
+    <button class="pd-close" aria-label="關閉"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="pd-hero" style="--pd-accent:${col}">
+      <div class="pd-chanrow"><span class="pd-logo" style="background:${col}22;color:${col}">${ico}</span>
+        <span class="pd-chanmeta"><span class="pd-channame">${esc(ch.n)}</span>
+          <span class="pd-channum">頻道 ${esc(ch.num)} · ${CAT_MAP[cat].label}</span></span></div>
+      <h2 class="pd-title">${esc(p.name)}</h2>
+      <div class="pd-tags">${isNow?'<span class="pd-tag tag-live">● 現正播出</span>':''}<span class="pd-tag">${dur} 分鐘</span></div>
+    </div>
+    <div class="pd-body">
+      <div class="pd-timecard">
+        <div class="pd-timeblock"><span class="pd-timebig">${fmtMin(p.start)}</span><span class="pd-timelabel">開始</span></div>
+        <div class="pd-timearrow"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span>${dur} 分鐘</span></div>
+        <div class="pd-timeblock"><span class="pd-timebig">${fmtMin(p.end)}</span><span class="pd-timelabel">結束</span></div>
+      </div>
+      <div class="pd-section"><h3>節目資訊</h3><p>${esc(ch.n)} · 頻道 ${esc(ch.num)}　|　${fmtMin(p.start)}–${fmtMin(p.end)}（${dur} 分鐘）。節目資料來自即時節目表。</p></div>
+    </div>
+  </aside>`;
+  const close=()=>scrim.remove();
+  scrim.onclick=e=>{ if(e.target===scrim) close(); };
+  scrim.querySelector('.pd-close').onclick=close;
+  scrim.querySelector('.pd-panel').onclick=e=>e.stopPropagation();
+  document.body.appendChild(scrim);
 }
 
-function showDetailFromVerified(ch,prog){
-  const r=REGIONS['us'];
-  const endMin=prog.gridMin+prog.dur;
-  const sh=pad((GRID_S+Math.floor(prog.gridMin/60))%24), sm=pad(prog.gridMin%60);
-  const eh=pad((GRID_S+Math.floor(endMin/60))%24), em=pad(endMin%60);
-
-  document.getElementById('dpIco').textContent=ch.ico;
-  document.getElementById('dpCh').textContent=`${r.flag} ${r.name} · CH ${ch.num} · ${ch.n}`;
-  document.getElementById('dpTitle').textContent=prog.name+(prog.epName&&prog.epName!==prog.name?`\n${prog.epName}`:'');
-  document.getElementById('dpMeta').textContent=`🕐 ${sh}:${sm} – ${eh}:${em}  ·  ${prog.dur} 分鐘`;
-  document.getElementById('dpDesc').textContent=prog.desc;
-  const tagsEl=document.getElementById('dpTags');
-  tagsEl.innerHTML='<span class="tag real-tag">✅ 真實節目資料</span><span class="tag live-tag">🔴 直播中</span>';
-}
-
-// ═══ SELECT CHANNEL ════════════════════════════════════════
-function selectChannel(idx){
-  selChIdx=idx;
-  document.querySelectorAll('.ch-cell').forEach((el,i)=>el.classList.toggle('sel',i===idx));
-  const cell=document.querySelector(`.ch-cell[data-idx="${idx}"]`);
-  if(cell)cell.scrollIntoView({block:'nearest',behavior:'smooth'});
-}
-
-// ═══ DETAIL PANEL ══════════════════════════════════════════
-function showDetail(ch,prog,isLive,isVerified){
-  const rid=curRegion, r=REGIONS[rid];
-  const endMin=prog.startMin+prog.dur;
-  const sh=pad((GRID_S+Math.floor(prog.startMin/60))%24), sm=pad(prog.startMin%60);
-  const eh=pad((GRID_S+Math.floor(endMin/60))%24), em=pad(endMin%60);
-
-  document.getElementById('dpIco').textContent=ch.ico;
-  document.getElementById('dpCh').textContent=`${r.flag} ${r.name} · CH ${ch.num} · ${ch.n}`;
-  document.getElementById('dpTitle').textContent=prog.title;
-  document.getElementById('dpMeta').textContent=`🕐 ${sh}:${sm} – ${eh}:${em}  ·  ${prog.dur} 分鐘`;
-  document.getElementById('dpDesc').textContent=prog.desc;
-  const tagsEl=document.getElementById('dpTags');
-  tagsEl.innerHTML='';
-  if(isVerified)tagsEl.insertAdjacentHTML('beforeend','<span class="tag real-tag">✅ 真實節目資料</span>');
-  if(isLive)tagsEl.insertAdjacentHTML('beforeend','<span class="tag live-tag">🔴 直播中</span>');
-  tagsEl.insertAdjacentHTML('beforeend',`<span class="tag">${prog.type}</span><span class="tag">${prog.dur} min</span>`);
-  document.getElementById('detailPanel').classList.add('open');
-}
-
-function closeDetail(){
-  document.getElementById('detailPanel').classList.remove('open');
-  document.querySelectorAll('.pb.sel-prog').forEach(el=>el.classList.remove('sel-prog'));
-}
-
-document.getElementById('progScroll').addEventListener('click',e=>{
-  if(e.target===document.getElementById('progScroll')||
-     e.target===document.getElementById('progGrid'))closeDetail();
-});
-
-setInterval(()=>{
-  if(curRegion){
-    const tz=curRegion==='us'?` (${usTzLabel})`:'';
-    document.getElementById('hdrSub').textContent=`當地時間 ${localTimeStr(curRegion)}${tz}`;
-  }
-},60000);
+renderRegions();
 </script>
 </body>
 </html>
