@@ -211,12 +211,9 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 .pb.verified.past   { opacity:.5; }
 .pb.verified .pb-title { color:#006b28; font-weight:700; }
 .pb.verified .pb-time  { color:#339955; }
-.verified-badge {
-  position:absolute; top:5px; right:6px;
-  font-size:9px; font-weight:700; color:#006b28;
-  background:rgba(0,160,60,.15); border:1px solid rgba(0,160,60,.3);
-  border-radius:4px; padding:1px 5px; line-height:1.4;
-}
+.verified-badge { display:none; }
+/* Hide channels without real (live) program data */
+.ch-cell.nodata, .prog-row.nodata { display:none !important; }
 
 .pb-title { font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text); }
 .pb.live .pb-title { color:var(--accent); }
@@ -1026,6 +1023,12 @@ function filterChannels(q){
   const rows=document.querySelectorAll('.prog-row');
   let visible=0;
   cells.forEach((cell,i)=>{
+    // Never reveal channels hidden for lacking real data
+    if(cell.classList.contains('nodata')){
+      cell.style.display='none';
+      if(rows[i])rows[i].style.display='none';
+      return;
+    }
     const name=cell.querySelector('.ch-n')?.textContent.toLowerCase()||'';
     const num=(CHANNELS[curRegion]?.[i]?.num||'').toLowerCase();
     const match=!q||name.includes(q)||num.includes(q);
@@ -1080,6 +1083,9 @@ function openRegion(rid){
 function buildEPG(rid){
   const channels=CHANNELS[rid]||[];
   const {totalMin:nowMin}=localNow(rid);
+  // For regions with a real-data source, start channels hidden and reveal
+  // each one only after live program data arrives.
+  const realOnly=(rid==='us'||rid==='tw');
 
   // Time header
   const slotsEl=document.getElementById('timeSlots');
@@ -1102,7 +1108,7 @@ function buildEPG(rid){
     const nowRelMin=nowMin-GRID_S*60;
     const cur=sched.find(s=>s.startMin<=nowRelMin&&s.startMin+s.dur>nowRelMin);
     const div=document.createElement('div');
-    div.className='ch-cell'; div.dataset.idx=i;
+    div.className='ch-cell'+(realOnly?' nodata':''); div.dataset.idx=i;
     div.innerHTML=`<div class="ch-ico">${ch.ico}</div>
       <div class="ch-txt">
         <div class="ch-n">${ch.n}</div>
@@ -1123,7 +1129,7 @@ function buildEPG(rid){
   channels.forEach((ch,i)=>{
     const sched=buildSchedule(ch.id,rid);
     const row=document.createElement('div');
-    row.className='prog-row'; row.dataset.chIdx=i;
+    row.className='prog-row'+(realOnly?' nodata':''); row.dataset.chIdx=i;
     const nowRelMin=nowMin-GRID_S*60;
 
     sched.forEach((prog,pi)=>{
@@ -1323,6 +1329,11 @@ function _applyTWProgs(chIdx,progs){
       }
     }
   });
+  // Reveal this channel if it received any real data
+  if(row.querySelector('.pb.verified')){
+    row.classList.remove('nodata');
+    document.querySelector(`.ch-cell[data-idx="${chIdx}"]`)?.classList.remove('nodata');
+  }
 }
 
 // Shared CORS proxy: codetabs bypasses Cloudflare; allorigins as fallback.
@@ -1487,6 +1498,11 @@ function _applyUSProgs(chIdx,progs){
       }
     }
   });
+  // Reveal this channel if it received any real data
+  if(row.querySelector('.pb.verified')){
+    row.classList.remove('nodata');
+    document.querySelector(`.ch-cell[data-idx="${chIdx}"]`)?.classList.remove('nodata');
+  }
 }
 
 async function _fetchSlug(slug){
