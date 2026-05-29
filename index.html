@@ -1794,7 +1794,7 @@ function _fitVerifiedBlock(sourcePb,rid,chIdx,prog){
   if(collides)return;
   const pb=document.createElement('div');
 
-  pb.className='pb verified real-fit'+(dur<35?' tight':'')+(isLive?' live':'')+(isPast?' past':'');
+  pb.className='pb verified real-fit'+(dur<20?' tight':'')+(isLive?' live':'')+(isPast?' past':'');
   pb.style.left=(gridMin*MIN_PX)+'px';
   pb.style.width=(dur*MIN_PX)+'px';
   pb.style.position='absolute';
