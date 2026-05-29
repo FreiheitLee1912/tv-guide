@@ -135,6 +135,26 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 .tz-pill.active { background:var(--accent); color:#fff; border-color:var(--accent); }
 .tz-pill:hover:not(.active) { background:var(--card2); }
 
+/* Category filter bar */
+.cat-bar {
+  display:none; flex-shrink:0; align-items:center; gap:6px;
+  padding:7px 12px; overflow-x:auto; overflow-y:hidden; white-space:nowrap;
+  background:var(--sidebar); border-bottom:1px solid var(--border);
+  scrollbar-width:thin; z-index:21;
+}
+.cat-bar.show { display:flex; }
+.cat-bar::-webkit-scrollbar { height:4px; }
+.cat-bar::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+.cat-pill {
+  flex-shrink:0; font-size:12px; font-weight:600; padding:4px 12px;
+  border-radius:14px; border:1px solid var(--border);
+  background:var(--card); color:var(--muted); cursor:pointer;
+  transition:background .12s, color .12s, border-color .12s; white-space:nowrap;
+}
+.cat-pill.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+.cat-pill:hover:not(.active) { background:var(--card2); color:var(--text); }
+.cat-pill .cnt { font-size:10px; opacity:.7; margin-left:3px; }
+
 .time-slots-wrap { flex:1; overflow:hidden; }
 .time-slots { display:flex; height:100%; width:max-content; }
 .ts {
@@ -212,6 +232,13 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 .pb.verified .pb-title { color:#006b28; font-weight:700; }
 .pb.verified .pb-time  { color:#339955; }
 .verified-badge { display:none; }
+/* Real-data-only regions: render placeholder (non-verified) blocks as
+   empty gaps — keep their width so verified blocks stay time-aligned. */
+.prog-grid.real-only .pb:not(.verified) {
+  background:transparent !important; border-right-color:transparent;
+  cursor:default; pointer-events:none;
+}
+.prog-grid.real-only .pb:not(.verified) > * { visibility:hidden; }
 /* Hide channels without real (live) program data */
 .ch-cell.nodata, .prog-row.nodata { display:none !important; }
 
@@ -316,6 +343,7 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 
   <!-- EPG PAGE -->
   <div id="pageEPG">
+    <div class="cat-bar" id="catBar"></div>
     <div class="time-hdr">
       <div class="time-ch-gap">
         <div class="ch-search-wrap">
@@ -975,7 +1003,7 @@ function buildSchedule(chId, regionId) {
 }
 
 // ═══ STATE ════════════════════════════════════════════════
-let curRegion=null, selChIdx=0, usTzOff=-4, usTzLabel='ET';
+let curRegion=null, selChIdx=0, usTzOff=-4, usTzLabel='ET', curCat='all';
 
 // ═══ CLOCK ════════════════════════════════════════════════
 function pad(n){return String(n).padStart(2,'0');}
@@ -1016,36 +1044,102 @@ function setTZ(off,label){
   if(curRegion==='us') buildEPG('us');
 }
 
-// ═══ CHANNEL FILTER ═══════════════════════════════════════
-function filterChannels(q){
-  q=q.trim().toLowerCase();
+// ═══ CHANNEL CATEGORIES ═══════════════════════════════════
+const CATS=[
+  {k:'all',     label:'全部'},
+  {k:'news',    label:'新聞'},
+  {k:'finance', label:'財經'},
+  {k:'ent',     label:'綜合娛樂'},
+  {k:'drama',   label:'戲劇'},
+  {k:'movie',   label:'電影'},
+  {k:'sports',  label:'體育'},
+  {k:'kids',    label:'兒童'},
+  {k:'doc',     label:'知識紀實'},
+  {k:'music',   label:'音樂'},
+  {k:'religion',label:'宗教'},
+];
+const CAT_LABEL=Object.fromEntries(CATS.map(c=>[c.k,c.label]));
+const CH_CAT_CACHE={};
+function channelCategory(ch){
+  if(CH_CAT_CACHE[ch.id])return CH_CAT_CACHE[ch.id];
+  const n=ch.n||'';
+  const has=(...arr)=>arr.some(k=>n.toLowerCase().includes(k.toLowerCase()));
+  let cat;
+  if(has('好消息','大愛','佛','慈悲','法界','唯心','信吉','華藏','正德','三聖','天美麗','新天地','福音','人間衛視','十方','佛衛','GOOD TV','EWTN','Daystar','TBN','Word Network','Inspiration','Catholic'))cat='religion';
+  else if(has('財經','商業','Bloomberg','CNBC','非凡','Fox Business','股','運通財經','全球財經','第1商業','寰宇財經'))cat='finance';
+  else if(has('體育','運動','Sport','ESPN','球','博斯','NBA','NFL','MLB','NHL','Golf','Tennis','Eleven','DAZN','UFC','WWE','Fight','beIN','SEC','ACC','Big Ten','TVG','Racing','Outdoor','Fishing','GolTV','智林','FanDuel','Marquee','BYU','Sportsman'))cat='sports';
+  else if(has('新聞','News','CNN','BBC','MSNBC','Fox News','寰宇','年代','Newsmax','半島','Al Jazeera','i24','Euronews','France','德國之聲','DW','鏡電視','TaiwanPlus','C-SPAN','NewsNation','HLN','NHK','Arirang','CGTN','NewsAsia','ETtoday','First TV','People TV','Right Now','Law & Crime','國會頻道'))cat='news';
+  else if(has('卡通','親子','幼','兒童','童','YOYO','MOMO親子','momo親子','Nick','Disney','Cartoon','Boomerang','Baby','Kids','尼克','ELTV','Animax','CBeebies','DreamWorks','Cartoonito','龍華動畫','Universal Kids','達文西'))cat='kids';
+  else if(has('探索','國家地理','動物','Discovery','Nat Geo','National Geographic','Smithsonian','History','歷史','紀實','知識','科學','Science','Animal','BBC Earth','BBC Lifestyle','DMAX','EVE','旅遊','美食','Travel','Food','TLC','Lifestyle','麥哲倫','視納華仁','HGTV','居家','幸福空間','Luxe','Magnolia','Cooking','DIY','FYI','Destination','American Heroes','Military','Investigation','Nature','Pet','Earth'))cat='doc';
+  else if(has('MTV','VH1','音樂','Music','Mezzo','CMusic','Trace','古典','KMTV','演唱','CMT','Revolt','Fuse','Stingray','Logo'))cat='music';
+  else if(has('電影','影城','片','Movie','Cinema','HBO','MAX','Cinemax','Starz','MGM','TMC','Flix','Showtime','采昌','美亞','影迷','Warner','天映','Hollywood','好萊塢','龍華電影','龍華洋片','AXN','FOX MOVIE','Encore','Sundance','IFC','TCM','Turner Classic','Comet','映畫'))cat='movie';
+  else if(has('戲劇','劇','Drama','偶像','韓劇'))cat='drama';
+  else cat='ent';
+  CH_CAT_CACHE[ch.id]=cat;
+  return cat;
+}
+
+// ═══ CHANNEL VISIBILITY (category + search + real-data) ═══
+function applyChannelVisibility(){
+  const input=document.getElementById('chSearch');
+  const q=(input?.value||'').trim().toLowerCase();
   const cells=document.querySelectorAll('.ch-cell');
   const rows=document.querySelectorAll('.prog-row');
   let visible=0;
   cells.forEach((cell,i)=>{
-    // Never reveal channels hidden for lacking real data
-    if(cell.classList.contains('nodata')){
-      cell.style.display='none';
-      if(rows[i])rows[i].style.display='none';
-      return;
-    }
+    const catOk=curCat==='all'||cell.dataset.cat===curCat;
     const name=cell.querySelector('.ch-n')?.textContent.toLowerCase()||'';
     const num=(CHANNELS[curRegion]?.[i]?.num||'').toLowerCase();
-    const match=!q||name.includes(q)||num.includes(q);
-    cell.style.display=match?'':'none';
-    if(rows[i])rows[i].style.display=match?'':'none';
-    if(match)visible++;
+    const qOk=!q||name.includes(q)||num.includes(q);
+    const show=catOk&&qOk;
+    // Inline display controls category+search; CSS .nodata hides no-data
+    // channels until their real data arrives (then class is removed).
+    cell.style.display=show?'':'none';
+    if(rows[i])rows[i].style.display=show?'':'none';
+    if(show&&!cell.classList.contains('nodata'))visible++;
   });
   const clearBtn=document.getElementById('chSearchClear');
   const countEl=document.getElementById('filterCount');
-  clearBtn.classList.toggle('show',q.length>0);
-  if(q){countEl.textContent=`${visible} 個頻道`;countEl.classList.add('show');}
-  else{countEl.textContent='';countEl.classList.remove('show');}
+  if(clearBtn)clearBtn.classList.toggle('show',q.length>0);
+  if(countEl){
+    if(q||curCat!=='all'){countEl.textContent=`${visible} 個頻道`;countEl.classList.add('show');}
+    else{countEl.textContent='';countEl.classList.remove('show');}
+  }
 }
+
+function filterChannels(q){ applyChannelVisibility(); }
 
 function clearFilter(){
   const input=document.getElementById('chSearch');
-  if(input){input.value='';filterChannels('');}
+  if(input)input.value='';
+  applyChannelVisibility();
+}
+
+function setCat(cat){
+  curCat=cat;
+  document.querySelectorAll('.cat-pill').forEach(p=>p.classList.toggle('active',p.dataset.cat===cat));
+  applyChannelVisibility();
+}
+
+function renderCatBar(rid){
+  const bar=document.getElementById('catBar');
+  if(!bar)return;
+  const channels=CHANNELS[rid]||[];
+  // Count channels per category for this region
+  const counts={};
+  channels.forEach(ch=>{const c=channelCategory(ch);counts[c]=(counts[c]||0)+1;});
+  bar.innerHTML='';
+  CATS.forEach(c=>{
+    if(c.k!=='all'&&!counts[c.k])return; // skip empty categories
+    const b=document.createElement('button');
+    b.className='cat-pill'+(c.k===curCat?' active':'');
+    b.dataset.cat=c.k;
+    const n=c.k==='all'?channels.length:counts[c.k];
+    b.innerHTML=`${c.label}<span class="cnt">${n}</span>`;
+    b.onclick=()=>setCat(c.k);
+    bar.appendChild(b);
+  });
+  bar.classList.add('show');
 }
 
 // ═══ NAVIGATION ═══════════════════════════════════════════
@@ -1056,11 +1150,13 @@ function goHome(){
   document.getElementById('hdrSub').textContent='選擇地區查看節目';
   document.getElementById('pageHome').classList.add('active');
   document.getElementById('pageEPG').classList.remove('active');
+  document.getElementById('catBar')?.classList.remove('show');
   closeDetail();
 }
 
 function openRegion(rid){
   curRegion=rid;
+  curCat='all';
   const r=REGIONS[rid];
   document.getElementById('backBtn').classList.add('show');
   const tzLabel=rid==='us'?` (${usTzLabel})`:'';
@@ -1109,6 +1205,7 @@ function buildEPG(rid){
     const cur=sched.find(s=>s.startMin<=nowRelMin&&s.startMin+s.dur>nowRelMin);
     const div=document.createElement('div');
     div.className='ch-cell'+(realOnly?' nodata':''); div.dataset.idx=i;
+    div.dataset.cat=channelCategory(ch);
     div.innerHTML=`<div class="ch-ico">${ch.ico}</div>
       <div class="ch-txt">
         <div class="ch-n">${ch.n}</div>
@@ -1121,6 +1218,7 @@ function buildEPG(rid){
 
   // Program grid
   const grid=document.getElementById('progGrid');
+  grid.classList.toggle('real-only',realOnly);
   Array.from(grid.querySelectorAll('.prog-row')).forEach(r=>r.remove());
   const totalW=(GRID_E-GRID_S)*2*SLOT_W;
   grid.style.width=totalW+'px';
@@ -1188,6 +1286,10 @@ function buildEPG(rid){
     const viewW=progScroll.clientWidth;
     progScroll.scrollLeft=Math.max(0,nowX-viewW/3);
   });
+
+  // Category bar + initial visibility
+  renderCatBar(rid);
+  applyChannelVisibility();
 
   // Fetch live program data
   if(rid==='us') fetchAllUSData();
