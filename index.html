@@ -25,7 +25,7 @@
   --slot-w:   110px;
   --row-h:    66px;
   --hdr-h:    54px;
-  --time-h:   34px;
+  --time-h:   62px;
 }
 
 html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--text);
@@ -90,19 +90,47 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 }
 .time-ch-gap {
   width:var(--ch-w); flex-shrink:0; border-right:1px solid var(--border);
-  background:var(--sidebar); display:flex; align-items:center;
-  padding:0 10px; gap:6px;
+  background:var(--sidebar); display:flex; flex-direction:column;
+  justify-content:center; padding:6px 8px; gap:5px;
 }
 
+/* Search box */
+.ch-search-wrap {
+  display:flex; align-items:center; gap:5px;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:8px; padding:4px 8px; transition:border-color .15s;
+}
+.ch-search-wrap:focus-within { border-color:var(--accent); }
+.ch-search-wrap .ico { font-size:12px; color:var(--muted); flex-shrink:0; }
+#chSearch {
+  border:none; outline:none; background:transparent;
+  font-size:12px; color:var(--text); width:100%;
+  font-family:inherit;
+}
+#chSearch::placeholder { color:var(--muted); }
+.ch-search-clear {
+  display:none; border:none; background:none; cursor:pointer;
+  color:var(--muted); font-size:14px; padding:0; line-height:1;
+  flex-shrink:0;
+}
+.ch-search-clear.show { display:block; }
+.ch-search-clear:hover { color:var(--text); }
+
+/* Filter count badge */
+#filterCount {
+  font-size:10px; color:var(--accent); font-weight:600;
+  text-align:center; display:none;
+}
+#filterCount.show { display:block; }
+
 /* TZ pills */
-.tz-pills { display:none; align-items:center; gap:3px; }
+.tz-pills { display:none; align-items:center; gap:3px; justify-content:center; }
 .tz-pills.show { display:flex; }
 .tz-pill {
-  font-size:10px; font-weight:600; padding:2px 7px;
-  border-radius:12px; border:1px solid var(--border);
+  font-size:10px; font-weight:600; padding:2px 6px;
+  border-radius:10px; border:1px solid var(--border);
   background:transparent; color:var(--muted); cursor:pointer;
-  transition:background .12s, color .12s;
-  white-space:nowrap;
+  transition:background .12s, color .12s; white-space:nowrap;
 }
 .tz-pill.active { background:var(--accent); color:#fff; border-color:var(--accent); }
 .tz-pill:hover:not(.active) { background:var(--card2); }
@@ -293,13 +321,20 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
   <div id="pageEPG">
     <div class="time-hdr">
       <div class="time-ch-gap">
-        <div class="tz-pills" id="tzPills">
-          <button class="tz-pill active" onclick="setTZ(-4,'ET')" id="tzET">ET</button>
-          <button class="tz-pill" onclick="setTZ(-5,'CT')" id="tzCT">CT</button>
-          <button class="tz-pill" onclick="setTZ(-6,'MT')" id="tzMT">MT</button>
-          <button class="tz-pill" onclick="setTZ(-7,'PT')" id="tzPT">PT</button>
+        <div class="ch-search-wrap">
+          <span class="ico">🔍</span>
+          <input id="chSearch" type="text" placeholder="搜尋頻道名稱或頻道號…" autocomplete="off" oninput="filterChannels(this.value)" />
+          <button class="ch-search-clear" id="chSearchClear" onclick="clearFilter()">×</button>
         </div>
-        <span id="chGapLabel" style="font-size:11px;color:var(--muted);display:none">頻道</span>
+        <div style="display:flex;align-items:center;justify-content:space-between;min-height:18px">
+          <div class="tz-pills" id="tzPills">
+            <button class="tz-pill active" onclick="setTZ(-4,'ET')" id="tzET">ET</button>
+            <button class="tz-pill" onclick="setTZ(-5,'CT')" id="tzCT">CT</button>
+            <button class="tz-pill" onclick="setTZ(-6,'MT')" id="tzMT">MT</button>
+            <button class="tz-pill" onclick="setTZ(-7,'PT')" id="tzPT">PT</button>
+          </div>
+          <span id="filterCount"></span>
+        </div>
       </div>
       <div class="time-slots-wrap" id="timeSlotsWrap">
         <div class="time-slots" id="timeSlots"></div>
@@ -984,6 +1019,32 @@ function setTZ(off,label){
   if(curRegion==='us') buildEPG('us');
 }
 
+// ═══ CHANNEL FILTER ═══════════════════════════════════════
+function filterChannels(q){
+  q=q.trim().toLowerCase();
+  const cells=document.querySelectorAll('.ch-cell');
+  const rows=document.querySelectorAll('.prog-row');
+  let visible=0;
+  cells.forEach((cell,i)=>{
+    const name=cell.querySelector('.ch-n')?.textContent.toLowerCase()||'';
+    const num=(CHANNELS[curRegion]?.[i]?.num||'').toLowerCase();
+    const match=!q||name.includes(q)||num.includes(q);
+    cell.style.display=match?'':'none';
+    if(rows[i])rows[i].style.display=match?'':'none';
+    if(match)visible++;
+  });
+  const clearBtn=document.getElementById('chSearchClear');
+  const countEl=document.getElementById('filterCount');
+  clearBtn.classList.toggle('show',q.length>0);
+  if(q){countEl.textContent=`${visible} 個頻道`;countEl.classList.add('show');}
+  else{countEl.textContent='';countEl.classList.remove('show');}
+}
+
+function clearFilter(){
+  const input=document.getElementById('chSearch');
+  if(input){input.value='';filterChannels('');}
+}
+
 // ═══ NAVIGATION ═══════════════════════════════════════════
 function goHome(){
   curRegion=null;
@@ -1009,6 +1070,7 @@ function openRegion(rid){
   const label=document.getElementById('chGapLabel');
   if(rid==='us'){pills.classList.add('show');label.style.display='none';}
   else{pills.classList.remove('show');label.style.display='';}
+  clearFilter();
   buildEPG(rid);
   selChIdx=0;
   selectChannel(0);
