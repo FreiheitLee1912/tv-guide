@@ -8,241 +8,237 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:       #0d0d12;
-  --sidebar:  #111118;
-  --card:     #17171f;
-  --card2:    #1e1e28;
-  --border:   #272733;
-  --accent:   #6c63ff;
-  --accent2:  rgba(108,99,255,.15);
-  --text:     #eeeef8;
-  --muted:    #6868a0;
-  --live:     #00e676;
-  --now-clr:  #ff4757;
-  --ch-w:     170px;
-  --slot-w:   110px;   /* px per 30 min */
+  --bg:       #f2f2f7;
+  --sidebar:  #e8e8f0;
+  --card:     #ffffff;
+  --card2:    #f0f0f8;
+  --border:   #d8d8e8;
+  --accent:   #5248d4;
+  --accent2:  rgba(82,72,212,.1);
+  --text:     #1a1a2e;
+  --muted:    #8080a8;
+  --live:     #007a35;
+  --now-clr:  #d92d20;
+  --verified-bg:   rgba(0, 160, 60, .12);
+  --verified-top:  #00a03c;
+  --ch-w:     175px;
+  --slot-w:   110px;
   --row-h:    66px;
   --hdr-h:    54px;
   --time-h:   34px;
 }
 
-html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text);
-  font-family: -apple-system,'PingFang TC','Noto Sans TC',sans-serif; }
+html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--text);
+  font-family:-apple-system,'PingFang TC','Noto Sans TC',sans-serif; }
 
-/* ═══ HEADER ═══════════════════════════════════════════ */
+/* ─── HEADER ──────────────────────────────────────────── */
 #hdr {
-  height: var(--hdr-h);
-  display: flex; align-items: center; gap: 10px;
-  padding: 0 16px;
-  background: rgba(13,13,18,.97);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  position: relative; z-index: 30;
-  flex-shrink: 0;
+  height:var(--hdr-h); display:flex; align-items:center; gap:10px;
+  padding:0 16px; background:rgba(242,242,247,.96);
+  backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
+  position:relative; z-index:30; flex-shrink:0;
 }
 #backBtn {
-  display: none; align-items: center; justify-content: center;
-  width: 34px; height: 34px; border-radius: 50%;
-  border: 1px solid var(--border); background: var(--card);
-  color: var(--text); font-size: 20px; cursor: pointer;
-  flex-shrink: 0; transition: background .15s;
+  display:none; align-items:center; justify-content:center;
+  width:34px; height:34px; border-radius:50%;
+  border:1px solid var(--border); background:var(--card);
+  color:var(--text); font-size:20px; cursor:pointer; flex-shrink:0;
+  transition:background .15s;
 }
-#backBtn:hover { background: var(--card2); }
-#backBtn.show  { display: flex; }
+#backBtn:hover { background:var(--card2); }
+#backBtn.show  { display:flex; }
 .hdr-info {}
-#hdrTitle { font-size: 17px; font-weight: 700; }
-#hdrSub   { font-size: 11px; color: var(--muted); margin-top: 1px; }
-.clock { margin-left: auto; text-align: right; }
-.clock .hm   { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.clock .date { font-size: 11px; color: var(--muted); }
+#hdrTitle { font-size:17px; font-weight:700; }
+#hdrSub   { font-size:11px; color:var(--muted); margin-top:1px; }
+.clock { margin-left:auto; text-align:right; }
+.clock .hm   { font-size:20px; font-weight:600; font-variant-numeric:tabular-nums; color:var(--text); }
+.clock .date { font-size:11px; color:var(--muted); }
 
-/* ═══ APP SHELL ═════════════════════════════════════════ */
-#app { height: calc(100vh - var(--hdr-h)); display: flex; flex-direction: column; overflow: hidden; }
+/* ─── APP SHELL ───────────────────────────────────────── */
+#app { height:calc(100vh - var(--hdr-h)); display:flex; flex-direction:column; overflow:hidden; }
 
-/* ═══ HOME PAGE ═════════════════════════════════════════ */
-#pageHome { overflow-y: auto; padding: 20px; display: none; }
-#pageHome.active { display: block; }
-
-.home-heading { font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: .8px;
-  text-transform: uppercase; margin-bottom: 14px; }
-
-.region-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; }
-@media(min-width:520px) { .region-grid { grid-template-columns: repeat(4,1fr); } }
-
+/* ─── HOME PAGE ───────────────────────────────────────── */
+#pageHome { overflow-y:auto; padding:20px; display:none; }
+#pageHome.active { display:block; }
+.home-heading { font-size:12px; color:var(--muted); font-weight:700; letter-spacing:.8px;
+  text-transform:uppercase; margin-bottom:14px; }
+.region-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+@media(min-width:520px){ .region-grid { grid-template-columns:repeat(4,1fr); } }
 .region-card {
-  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-  padding: 26px 12px 18px; display: flex; flex-direction: column;
-  align-items: center; gap: 10px; cursor: pointer;
-  transition: transform .15s, border-color .15s, background .15s;
-  user-select: none; -webkit-tap-highlight-color: transparent;
+  background:var(--card); border:1px solid var(--border); border-radius:16px;
+  padding:26px 12px 18px; display:flex; flex-direction:column;
+  align-items:center; gap:10px; cursor:pointer;
+  box-shadow:0 1px 4px rgba(0,0,0,.06);
+  transition:transform .15s, border-color .15s, box-shadow .15s;
+  user-select:none;
 }
-.region-card:hover  { transform: translateY(-3px); border-color: var(--accent); background: var(--card2); }
-.region-card:active { transform: scale(.96); }
-.flag        { font-size: 48px; line-height: 1; }
-.region-name { font-size: 14px; font-weight: 600; }
-.region-cnt  { font-size: 11px; color: var(--muted); }
+.region-card:hover  { transform:translateY(-3px); border-color:var(--accent); box-shadow:0 4px 16px rgba(82,72,212,.15); }
+.region-card:active { transform:scale(.97); }
+.flag { font-size:48px; line-height:1; }
+.region-name { font-size:14px; font-weight:600; color:var(--text); }
+.region-cnt  { font-size:11px; color:var(--muted); }
 
-/* ═══ EPG PAGE ══════════════════════════════════════════ */
-#pageEPG { display: none; flex-direction: column; overflow: hidden; flex: 1; }
-#pageEPG.active { display: flex; }
+/* ─── EPG PAGE ────────────────────────────────────────── */
+#pageEPG { display:none; flex-direction:column; overflow:hidden; flex:1; }
+#pageEPG.active { display:flex; }
 
-/* Time-header strip */
+/* Time + TZ header strip */
 .time-hdr {
-  height: var(--time-h); flex-shrink: 0;
-  display: flex; overflow: hidden;
-  border-bottom: 1px solid var(--border);
-  background: var(--sidebar); position: relative; z-index: 20;
+  height:var(--time-h); flex-shrink:0; display:flex; overflow:hidden;
+  border-bottom:1px solid var(--border); background:var(--sidebar);
+  position:relative; z-index:20;
 }
 .time-ch-gap {
-  width: var(--ch-w); flex-shrink: 0;
-  border-right: 1px solid var(--border);
-  background: var(--sidebar);
-  display: flex; align-items: center; padding: 0 12px;
-  font-size: 11px; color: var(--muted);
+  width:var(--ch-w); flex-shrink:0; border-right:1px solid var(--border);
+  background:var(--sidebar); display:flex; align-items:center;
+  padding:0 10px; gap:6px;
 }
-.time-slots-wrap { flex: 1; overflow: hidden; }
-.time-slots {
-  display: flex; height: 100%;
-  width: max-content;
+
+/* TZ pills */
+.tz-pills { display:none; align-items:center; gap:3px; }
+.tz-pills.show { display:flex; }
+.tz-pill {
+  font-size:10px; font-weight:600; padding:2px 7px;
+  border-radius:12px; border:1px solid var(--border);
+  background:transparent; color:var(--muted); cursor:pointer;
+  transition:background .12s, color .12s;
+  white-space:nowrap;
 }
+.tz-pill.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+.tz-pill:hover:not(.active) { background:var(--card2); }
+
+.time-slots-wrap { flex:1; overflow:hidden; }
+.time-slots { display:flex; height:100%; width:max-content; }
 .ts {
-  flex-shrink: 0; width: var(--slot-w);
-  border-right: 1px solid var(--border);
-  display: flex; align-items: center; padding-left: 8px;
-  font-size: 11px; color: var(--muted);
-  font-variant-numeric: tabular-nums;
+  flex-shrink:0; width:var(--slot-w); border-right:1px solid var(--border);
+  display:flex; align-items:center; padding-left:8px;
+  font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums;
 }
-.ts.h0 { color: var(--text); font-weight: 600; font-size: 12px; }
+.ts.h0 { color:var(--text); font-weight:600; font-size:12px; }
 
 /* EPG body */
-.epg-body { flex: 1; display: flex; overflow: hidden; }
+.epg-body { flex:1; display:flex; overflow:hidden; }
 
 /* Channel sidebar */
 .ch-sidebar {
-  width: var(--ch-w); flex-shrink: 0;
-  overflow-y: auto; overflow-x: hidden;
-  border-right: 1px solid var(--border);
-  background: var(--sidebar);
-  scrollbar-width: none;
+  width:var(--ch-w); flex-shrink:0; overflow-y:auto; overflow-x:hidden;
+  border-right:1px solid var(--border); background:var(--sidebar);
+  scrollbar-width:none;
 }
-.ch-sidebar::-webkit-scrollbar { display: none; }
-
+.ch-sidebar::-webkit-scrollbar { display:none; }
 .ch-cell {
-  height: var(--row-h); display: flex; align-items: center;
-  gap: 8px; padding: 0 10px;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer; transition: background .12s;
-  flex-shrink: 0; position: relative;
+  height:var(--row-h); display:flex; align-items:center;
+  gap:8px; padding:0 10px; border-bottom:1px solid var(--border);
+  cursor:pointer; transition:background .12s; flex-shrink:0; position:relative;
 }
-.ch-cell:hover { background: var(--card); }
-.ch-cell.sel {
-  background: var(--accent2);
-  border-left: 3px solid var(--accent);
-  padding-left: 7px;
-}
+.ch-cell:hover { background:var(--card2); }
+.ch-cell.sel { background:var(--accent2); border-left:3px solid var(--accent); padding-left:7px; }
 .ch-ico {
-  font-size: 20px; width: 34px; height: 34px; border-radius: 8px;
-  background: var(--card2); display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+  font-size:20px; width:34px; height:34px; border-radius:8px;
+  background:var(--card); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
 }
-.ch-txt { min-width: 0; }
-.ch-n  { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ch-np { font-size: 10px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.ch-txt { min-width:0; }
+.ch-n  { font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text); }
+.ch-np { font-size:10px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
 .ch-live-dot {
-  width: 6px; height: 6px; border-radius: 50%; background: var(--live);
-  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-  animation: blink 1.8s ease-in-out infinite;
+  width:6px; height:6px; border-radius:50%; background:var(--live);
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  animation:blink 1.8s ease-in-out infinite;
 }
 @keyframes blink { 0%,100%{opacity:1}50%{opacity:.2} }
 
 /* Programs scroll */
-.prog-scroll { flex: 1; overflow: auto; position: relative; }
+.prog-scroll { flex:1; overflow:auto; position:relative; }
+.prog-grid   { position:relative; width:max-content; }
 
-.prog-grid { position: relative; width: max-content; }
-
-/* Red "NOW" line */
+/* NOW line */
 .now-line {
-  position: absolute; top: 0; bottom: 0; width: 2px;
-  background: var(--now-clr); z-index: 6; pointer-events: none;
+  position:absolute; top:0; bottom:0; width:2px;
+  background:var(--now-clr); z-index:6; pointer-events:none;
 }
 .now-line::before {
-  content: 'NOW'; position: absolute; top: -1px; left: 4px;
-  background: var(--now-clr); color: #fff;
-  font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px;
-  letter-spacing: .4px;
+  content:'NOW'; position:absolute; top:0; left:4px;
+  background:var(--now-clr); color:#fff;
+  font-size:9px; font-weight:700; padding:1px 5px; border-radius:3px; letter-spacing:.4px;
 }
 
-.prog-row {
-  height: var(--row-h); display: flex;
-  border-bottom: 1px solid var(--border);
-}
+.prog-row { height:var(--row-h); display:flex; border-bottom:1px solid var(--border); }
 
+/* Program block */
 .pb {
-  flex-shrink: 0; height: 100%;
-  border-right: 1px solid var(--border);
-  padding: 8px 10px; overflow: hidden;
-  cursor: pointer; position: relative;
-  background: var(--card);
-  transition: background .1s;
-  min-width: 30px;
+  flex-shrink:0; height:100%; border-right:1px solid var(--border);
+  padding:8px 10px; overflow:hidden; cursor:pointer;
+  position:relative; background:var(--card); transition:background .1s; min-width:30px;
 }
-.pb:hover { background: var(--card2); }
-.pb.live {
-  background: rgba(108,99,255,.1);
-  border-top: 2px solid var(--accent);
-  padding-top: 6px;
+.pb:hover  { background:var(--card2); }
+.pb.live   { background:rgba(82,72,212,.07); border-top:2px solid var(--accent); padding-top:6px; }
+.pb.live:hover { background:rgba(82,72,212,.14); }
+.pb.past   { opacity:.4; }
+.pb.sel-prog { background:rgba(82,72,212,.18) !important; }
+
+/* ✅ VERIFIED (from TVMaze real data) */
+.pb.verified        { background:var(--verified-bg) !important; border-top:2px solid var(--verified-top); padding-top:6px; }
+.pb.verified:hover  { background:rgba(0,160,60,.2) !important; }
+.pb.verified.past   { opacity:.5; }
+.pb.verified .pb-title { color:#006b28; font-weight:700; }
+.pb.verified .pb-time  { color:#339955; }
+.verified-badge {
+  position:absolute; top:5px; right:6px;
+  font-size:9px; font-weight:700; color:#006b28;
+  background:rgba(0,160,60,.15); border:1px solid rgba(0,160,60,.3);
+  border-radius:4px; padding:1px 5px; line-height:1.4;
 }
-.pb.live:hover { background: rgba(108,99,255,.2); }
-.pb.past { opacity: .38; }
-.pb.sel-prog { background: rgba(108,99,255,.25) !important; }
 
-.pb-title { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pb.live .pb-title { color: var(--accent); }
-.pb-time  { font-size: 10px; color: var(--muted); margin-top: 3px; font-variant-numeric: tabular-nums; }
+.pb-title { font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text); }
+.pb.live .pb-title { color:var(--accent); }
+.pb-time  { font-size:10px; color:var(--muted); margin-top:3px; font-variant-numeric:tabular-nums; }
+.pb-bar   { position:absolute; bottom:0; left:0; height:2px; background:var(--accent); }
 
-.pb-bar { position: absolute; bottom: 0; left: 0; height: 2px; background: var(--accent); }
+/* Loading overlay on prog-row */
+.loading-shimmer {
+  animation: shimmer 1.4s infinite;
+  background: linear-gradient(90deg, var(--card) 0%, var(--card2) 50%, var(--card) 100%);
+  background-size: 200% 100%;
+}
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
-/* ═══ DETAIL PANEL ══════════════════════════════════════ */
+/* ─── DETAIL PANEL ────────────────────────────────────── */
 #detailPanel {
-  flex-shrink: 0; max-height: 0; overflow: hidden;
-  background: var(--card); border-top: 1px solid var(--border);
-  transition: max-height .28s ease;
+  flex-shrink:0; max-height:0; overflow:hidden;
+  background:var(--card); border-top:1px solid var(--border);
+  transition:max-height .28s ease; box-shadow:0 -2px 12px rgba(0,0,0,.08);
 }
-#detailPanel.open { max-height: 200px; }
-
+#detailPanel.open { max-height:210px; }
 .dp-inner {
-  padding: 16px 20px 18px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 0 16px;
-  align-items: start;
+  padding:16px 20px 18px;
+  display:grid; grid-template-columns:auto 1fr auto; gap:0 16px; align-items:start;
 }
-.dp-ico  { font-size: 38px; padding-top: 2px; }
-.dp-body {}
-.dp-ch   { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
-.dp-title{ font-size: 19px; font-weight: 800; line-height: 1.25; }
-.dp-meta { font-size: 12px; color: var(--muted); margin-top: 5px; }
-.dp-desc { font-size: 13px; color: #b0b0cc; margin-top: 10px; line-height: 1.65; }
-.dp-tags { display: flex; gap: 7px; margin-top: 10px; flex-wrap: wrap; }
+.dp-ico   { font-size:38px; padding-top:2px; }
+.dp-ch    { font-size:11px; color:var(--muted); margin-bottom:4px; }
+.dp-title { font-size:19px; font-weight:800; line-height:1.25; color:var(--text); }
+.dp-meta  { font-size:12px; color:var(--muted); margin-top:5px; }
+.dp-desc  { font-size:13px; color:#606080; margin-top:10px; line-height:1.65; }
+.dp-tags  { display:flex; gap:7px; margin-top:10px; flex-wrap:wrap; }
 .tag {
-  font-size: 11px; padding: 3px 10px; border-radius: 20px;
-  border: 1px solid var(--border); color: var(--muted); background: var(--card2);
+  font-size:11px; padding:3px 10px; border-radius:20px;
+  border:1px solid var(--border); color:var(--muted); background:var(--card2);
 }
-.tag.live-tag { border-color: rgba(0,230,118,.4); color: var(--live); background: rgba(0,230,118,.08); }
+.tag.live-tag   { border-color:rgba(0,122,53,.4); color:var(--live); background:rgba(0,122,53,.08); }
+.tag.real-tag   { border-color:rgba(0,160,60,.4); color:#006b28; background:rgba(0,160,60,.1); }
 .dp-close {
-  background: var(--card2); border: 1px solid var(--border);
-  color: var(--muted); width: 28px; height: 28px; border-radius: 50%;
-  font-size: 16px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; transition: color .15s;
+  background:var(--card2); border:1px solid var(--border); color:var(--muted);
+  width:28px; height:28px; border-radius:50%; font-size:16px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition:color .15s;
+  flex-shrink:0;
 }
-.dp-close:hover { color: var(--text); }
+.dp-close:hover { color:var(--text); }
 
-/* ═══ SCROLLBAR ══════════════════════════════════════════ */
-.prog-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-.prog-scroll::-webkit-scrollbar-track { background: var(--bg); }
-.prog-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-.prog-scroll::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+/* ─── SCROLLBAR ───────────────────────────────────────── */
+.prog-scroll::-webkit-scrollbar { width:6px; height:6px; }
+.prog-scroll::-webkit-scrollbar-track { background:var(--card2); }
+.prog-scroll::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+.prog-scroll::-webkit-scrollbar-thumb:hover { background:var(--muted); }
 </style>
 </head>
 <body>
@@ -267,58 +263,48 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
     <p class="home-heading">選擇地區</p>
     <div class="region-grid">
       <div class="region-card" onclick="openRegion('tw')">
-        <div class="flag">🇹🇼</div>
-        <div class="region-name">台灣</div>
-        <div class="region-cnt">12 個頻道</div>
+        <div class="flag">🇹🇼</div><div class="region-name">台灣</div><div class="region-cnt">12 個頻道</div>
       </div>
       <div class="region-card" onclick="openRegion('hk')">
-        <div class="flag">🇭🇰</div>
-        <div class="region-name">香港</div>
-        <div class="region-cnt">6 個頻道</div>
+        <div class="flag">🇭🇰</div><div class="region-name">香港</div><div class="region-cnt">6 個頻道</div>
       </div>
       <div class="region-card" onclick="openRegion('cn')">
-        <div class="flag">🇨🇳</div>
-        <div class="region-name">中國大陸</div>
-        <div class="region-cnt">8 個頻道</div>
+        <div class="flag">🇨🇳</div><div class="region-name">中國大陸</div><div class="region-cnt">8 個頻道</div>
       </div>
       <div class="region-card" onclick="openRegion('us')">
-        <div class="flag">🇺🇸</div>
-        <div class="region-name">美國</div>
-        <div class="region-cnt">62 個頻道</div>
+        <div class="flag">🇺🇸</div><div class="region-name">美國</div><div class="region-cnt">62 個頻道</div>
       </div>
       <div class="region-card" onclick="openRegion('jp')">
-        <div class="flag">🇯🇵</div>
-        <div class="region-name">日本</div>
-        <div class="region-cnt">6 個頻道</div>
+        <div class="flag">🇯🇵</div><div class="region-name">日本</div><div class="region-cnt">6 個頻道</div>
       </div>
       <div class="region-card" onclick="openRegion('uk')">
-        <div class="flag">🇬🇧</div>
-        <div class="region-name">英國</div>
-        <div class="region-cnt">5 個頻道</div>
+        <div class="flag">🇬🇧</div><div class="region-name">英國</div><div class="region-cnt">5 個頻道</div>
       </div>
       <div class="region-card" onclick="openRegion('kr')">
-        <div class="flag">🇰🇷</div>
-        <div class="region-name">韓國</div>
-        <div class="region-cnt">5 個頻道</div>
+        <div class="flag">🇰🇷</div><div class="region-name">韓國</div><div class="region-cnt">5 個頻道</div>
       </div>
       <div class="region-card" onclick="openRegion('th')">
-        <div class="flag">🇹🇭</div>
-        <div class="region-name">泰國</div>
-        <div class="region-cnt">4 個頻道</div>
+        <div class="flag">🇹🇭</div><div class="region-name">泰國</div><div class="region-cnt">4 個頻道</div>
       </div>
     </div>
   </div>
 
   <!-- EPG PAGE -->
   <div id="pageEPG">
-    <!-- Time header -->
     <div class="time-hdr">
-      <div class="time-ch-gap" id="timeChGap">頻道</div>
+      <div class="time-ch-gap">
+        <div class="tz-pills" id="tzPills">
+          <button class="tz-pill active" onclick="setTZ(-4,'ET')" id="tzET">ET</button>
+          <button class="tz-pill" onclick="setTZ(-5,'CT')" id="tzCT">CT</button>
+          <button class="tz-pill" onclick="setTZ(-6,'MT')" id="tzMT">MT</button>
+          <button class="tz-pill" onclick="setTZ(-7,'PT')" id="tzPT">PT</button>
+        </div>
+        <span id="chGapLabel" style="font-size:11px;color:var(--muted);display:none">頻道</span>
+      </div>
       <div class="time-slots-wrap" id="timeSlotsWrap">
         <div class="time-slots" id="timeSlots"></div>
       </div>
     </div>
-    <!-- Body -->
     <div class="epg-body">
       <div class="ch-sidebar" id="chSidebar"></div>
       <div class="prog-scroll" id="progScroll">
@@ -327,12 +313,11 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         </div>
       </div>
     </div>
-    <!-- Detail panel -->
     <div id="detailPanel">
       <div class="dp-inner">
         <div class="dp-ico" id="dpIco"></div>
         <div class="dp-body">
-          <div class="dp-ch"  id="dpCh"></div>
+          <div class="dp-ch"    id="dpCh"></div>
           <div class="dp-title" id="dpTitle"></div>
           <div class="dp-meta"  id="dpMeta"></div>
           <div class="dp-desc"  id="dpDesc"></div>
@@ -346,439 +331,438 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 </div>
 
 <script>
-// ═══ CONFIG ══════════════════════════════════════════════
-const SLOT_W   = 110;   // px per 30 min
-const MIN_PX   = SLOT_W / 30;
-const GRID_S   = 5;     // grid start hour
-const GRID_E   = 26;    // grid end hour (next day 2am)
-const ROW_H    = 66;
+// ═══ CONSTANTS ════════════════════════════════════════════
+const SLOT_W  = 110;
+const MIN_PX  = SLOT_W / 30;
+const GRID_S  = 5;
+const GRID_E  = 26;
+const ROW_H   = 66;
 
-// ═══ DATA ════════════════════════════════════════════════
+// ═══ REGIONS ══════════════════════════════════════════════
 const REGIONS = {
-  tw: { name:'台灣', flag:'🇹🇼', tz:'Asia/Taipei', off:8 },
-  hk: { name:'香港', flag:'🇭🇰', tz:'Asia/Hong_Kong', off:8 },
-  cn: { name:'中國大陸', flag:'🇨🇳', tz:'Asia/Shanghai', off:8 },
-  us: { name:'美國', flag:'🇺🇸', tz:'America/New_York', off:-4 },
-  jp: { name:'日本', flag:'🇯🇵', tz:'Asia/Tokyo', off:9 },
-  uk: { name:'英國', flag:'🇬🇧', tz:'Europe/London', off:1 },
-  kr: { name:'韓國', flag:'🇰🇷', tz:'Asia/Seoul', off:9 },
-  th: { name:'泰國', flag:'🇹🇭', tz:'Asia/Bangkok', off:7 },
+  tw:{ name:'台灣',     flag:'🇹🇼', tz:'Asia/Taipei',    off:8  },
+  hk:{ name:'香港',     flag:'🇭🇰', tz:'Asia/Hong_Kong', off:8  },
+  cn:{ name:'中國大陸', flag:'🇨🇳', tz:'Asia/Shanghai',  off:8  },
+  us:{ name:'美國',     flag:'🇺🇸', tz:'America/New_York',off:-4 },
+  jp:{ name:'日本',     flag:'🇯🇵', tz:'Asia/Tokyo',     off:9  },
+  uk:{ name:'英國',     flag:'🇬🇧', tz:'Europe/London',  off:1  },
+  kr:{ name:'韓國',     flag:'🇰🇷', tz:'Asia/Seoul',     off:9  },
+  th:{ name:'泰國',     flag:'🇹🇭', tz:'Asia/Bangkok',   off:7  },
 };
 
+// ═══ CHANNELS ═════════════════════════════════════════════
 const CHANNELS = {
-  tw: [
-    { id:'tw01', n:'台視 TTV',    ico:'📡', num:'101' },
-    { id:'tw02', n:'中視 CTV',    ico:'🎬', num:'102' },
-    { id:'tw03', n:'民視 FTV',    ico:'🌐', num:'103' },
-    { id:'tw04', n:'公視 PTS',    ico:'📚', num:'104' },
-    { id:'tw05', n:'TVBS',        ico:'📰', num:'105' },
-    { id:'tw06', n:'TVBS新聞',    ico:'🔴', num:'56'  },
-    { id:'tw07', n:'三立台灣台',  ico:'🎭', num:'107' },
-    { id:'tw08', n:'三立新聞台',  ico:'📺', num:'51'  },
-    { id:'tw09', n:'東森台',      ico:'🦅', num:'109' },
-    { id:'tw10', n:'東森新聞台',  ico:'🟠', num:'57'  },
-    { id:'tw11', n:'年代新聞',    ico:'🗞', num:'52'  },
-    { id:'tw12', n:'中天新聞',    ico:'☁️', num:'53'  },
+  tw:[
+    {id:'tw01',n:'台視 TTV',    ico:'📡',num:'101'},
+    {id:'tw02',n:'中視 CTV',    ico:'🎬',num:'102'},
+    {id:'tw03',n:'民視 FTV',    ico:'🌐',num:'103'},
+    {id:'tw04',n:'公視 PTS',    ico:'📚',num:'104'},
+    {id:'tw05',n:'TVBS',        ico:'📰',num:'105'},
+    {id:'tw06',n:'TVBS新聞',    ico:'🔴',num:'56' },
+    {id:'tw07',n:'三立台灣台',  ico:'🎭',num:'107'},
+    {id:'tw08',n:'三立新聞台',  ico:'📺',num:'51' },
+    {id:'tw09',n:'東森台',      ico:'🦅',num:'109'},
+    {id:'tw10',n:'東森新聞台',  ico:'🟠',num:'57' },
+    {id:'tw11',n:'年代新聞',    ico:'🗞',num:'52' },
+    {id:'tw12',n:'中天新聞',    ico:'☁️',num:'53' },
   ],
-  hk: [
-    { id:'hk01', n:'TVB翡翠台',   ico:'💎', num:'201' },
-    { id:'hk02', n:'TVB明珠台',   ico:'🌟', num:'202' },
-    { id:'hk03', n:'ViuTV',       ico:'📺', num:'99'  },
-    { id:'hk04', n:'鳳凰衛視',    ico:'🦚', num:'204' },
-    { id:'hk05', n:'鳳凰資訊台',  ico:'📰', num:'71'  },
-    { id:'hk06', n:'無綫新聞台',  ico:'🔵', num:'72'  },
+  hk:[
+    {id:'hk01',n:'TVB翡翠台',  ico:'💎',num:'201'},
+    {id:'hk02',n:'TVB明珠台',  ico:'🌟',num:'202'},
+    {id:'hk03',n:'ViuTV',      ico:'📺',num:'99' },
+    {id:'hk04',n:'鳳凰衛視',   ico:'🦚',num:'204'},
+    {id:'hk05',n:'鳳凰資訊台', ico:'📰',num:'71' },
+    {id:'hk06',n:'無綫新聞台', ico:'🔵',num:'72' },
   ],
-  cn: [
-    { id:'cn01', n:'CCTV-1 綜合', ico:'📡', num:'301' },
-    { id:'cn02', n:'CCTV-4 中文', ico:'🌏', num:'302' },
-    { id:'cn03', n:'CCTV-13 新聞',ico:'📰', num:'81'  },
-    { id:'cn04', n:'湖南衛視',    ico:'🌶', num:'304' },
-    { id:'cn05', n:'浙江衛視',    ico:'🌊', num:'305' },
-    { id:'cn06', n:'江蘇衛視',    ico:'🏮', num:'306' },
-    { id:'cn07', n:'東方衛視',    ico:'🌃', num:'307' },
-    { id:'cn08', n:'北京衛視',    ico:'🏯', num:'308' },
+  cn:[
+    {id:'cn01',n:'CCTV-1 綜合', ico:'📡',num:'301'},
+    {id:'cn02',n:'CCTV-4 中文', ico:'🌏',num:'302'},
+    {id:'cn03',n:'CCTV-13 新聞',ico:'📰',num:'81' },
+    {id:'cn04',n:'湖南衛視',    ico:'🌶',num:'304'},
+    {id:'cn05',n:'浙江衛視',    ico:'🌊',num:'305'},
+    {id:'cn06',n:'江蘇衛視',    ico:'🏮',num:'306'},
+    {id:'cn07',n:'東方衛視',    ico:'🌃',num:'307'},
+    {id:'cn08',n:'北京衛視',    ico:'🏯',num:'308'},
   ],
-  us: [
-    // 凱凱提供的美國頻道列表
-    { id:'us01', n:'FOXHD',                    ico:'🦊', num:'1075' },
-    { id:'us02', n:'CNN',                      ico:'🔴', num:'1074' },
-    { id:'us03', n:'ABC News',                 ico:'🔵', num:'1073' },
-    { id:'us04', n:'NBC',                      ico:'🌈', num:'1072' },
-    { id:'us05', n:'Fox News',                 ico:'🦊', num:'1071' },
-    { id:'us06', n:'Fox Business',             ico:'💹', num:'1070' },
-    { id:'us07', n:'HBO Family',               ico:'🎬', num:'1069' },
-    { id:'us08', n:'HBO East',                 ico:'🎭', num:'1068' },
-    { id:'us09', n:'HBO One',                  ico:'⭐', num:'1067' },
-    { id:'us10', n:'Travel Channel',           ico:'✈️', num:'1066' },
-    { id:'us11', n:'Cooking Channel',          ico:'👨‍🍳', num:'1065' },
-    { id:'us12', n:'Bloomberg',                ico:'📊', num:'1064' },
-    { id:'us13', n:'Cinemax',                  ico:'🎞', num:'1063' },
-    { id:'us14', n:'Tennis Channel',           ico:'🎾', num:'1062' },
-    { id:'us15', n:'Nat Geo',                  ico:'🌍', num:'1061' },
-    { id:'us16', n:'Nat Geo Wild',             ico:'🐆', num:'1060' },
-    { id:'us17', n:'BabyTV',                   ico:'👶', num:'1059' },
-    { id:'us18', n:'MLB Network',              ico:'⚾', num:'1058' },
-    { id:'us19', n:'TNT',                      ico:'💥', num:'1057' },
-    { id:'us20', n:'Bravo',                    ico:'👏', num:'1056' },
-    { id:'us21', n:'Food Network',             ico:'🍳', num:'1055' },
-    { id:'us22', n:'Fight Network',            ico:'🥊', num:'1054' },
-    { id:'us23', n:'DIY Network',              ico:'🔧', num:'1053' },
-    { id:'us24', n:'Discovery',                ico:'🔭', num:'1052' },
-    { id:'us25', n:'Fishing Channel',          ico:'🎣', num:'1051' },
-    { id:'us26', n:'World Fishing Network',    ico:'🐟', num:'1050' },
-    { id:'us27', n:'VH1',                      ico:'🎵', num:'1049' },
-    { id:'us28', n:'TLC',                      ico:'🌸', num:'1048' },
-    { id:'us29', n:'NHL Network',              ico:'🏒', num:'1047' },
-    { id:'us30', n:'Hallmark',                 ico:'❤️', num:'1046' },
-    { id:'us31', n:'E!',                       ico:'✨', num:'1045' },
-    { id:'us32', n:'Syfy',                     ico:'🚀', num:'1044' },
-    { id:'us33', n:'HGTV',                     ico:'🏡', num:'1043' },
-    { id:'us34', n:'Golf Channel',             ico:'⛳', num:'1042' },
-    { id:'us35', n:'Law & Crime',              ico:'⚖️', num:'1041' },
-    { id:'us36', n:'MSNBC',                    ico:'📺', num:'1040' },
-    { id:'us37', n:'GolTV',                    ico:'⚽', num:'1039' },
-    { id:'us38', n:'TVG',                      ico:'🐎', num:'1038' },
-    { id:'us39', n:'TBS',                      ico:'😂', num:'1036' },
-    { id:'us40', n:'MTV',                      ico:'🎤', num:'1035' },
-    { id:'us41', n:'PBS',                      ico:'🎓', num:'1034' },
-    { id:'us42', n:'FX',                       ico:'🎬', num:'1030' },
-    { id:'us43', n:'Lifetime',                 ico:'💜', num:'1028' },
-    { id:'us44', n:'BET',                      ico:'🎶', num:'1027' },
-    { id:'us45', n:'CNBC',                     ico:'💰', num:'1026' },
-    { id:'us46', n:'The CW',                   ico:'⚡', num:'1024' },
-    { id:'us47', n:'Animal Planet',            ico:'🦁', num:'1023' },
-    { id:'us48', n:'A&E',                      ico:'🔍', num:'1022' },
-    { id:'us49', n:'Freeform',                 ico:'🌀', num:'1021' },
-    { id:'us50', n:'Game Show Network',        ico:'🎯', num:'1019' },
-    { id:'us51', n:'Investigation Discovery',  ico:'🔎', num:'1017' },
-    { id:'us52', n:'Lifetime Movies',          ico:'🎥', num:'1016' },
-    { id:'us53', n:'Showtime',                 ico:'🏆', num:'1013' },
-    { id:'us54', n:'Starz',                    ico:'⭐', num:'1012' },
-    { id:'us55', n:'USA Network',              ico:'🦅', num:'1010' },
-    { id:'us56', n:'Newsmax',                  ico:'📣', num:'1078' },
-    { id:'us57', n:'First TV',                 ico:'1️⃣', num:'1079' },
-    { id:'us58', n:'People TV',                ico:'👥', num:'1080' },
-    { id:'us59', n:'Right Now',                ico:'⚡', num:'1081' },
-    { id:'us60', n:'Bloomberg TV',             ico:'📈', num:'1082' },
-    { id:'us61', n:'Nat Geographic',           ico:'🗺', num:'1089' },
-    { id:'us62', n:'Nat Geo Wild',             ico:'🦅', num:'1090' },
+  us:[
+    {id:'us01',n:'FOXHD',                   ico:'🦊',num:'1075'},
+    {id:'us02',n:'CNN',                     ico:'🔴',num:'1074'},
+    {id:'us03',n:'ABC News',                ico:'🔵',num:'1073'},
+    {id:'us04',n:'NBC',                     ico:'🌈',num:'1072'},
+    {id:'us05',n:'Fox News',                ico:'🦊',num:'1071'},
+    {id:'us06',n:'Fox Business',            ico:'💹',num:'1070'},
+    {id:'us07',n:'HBO Family',              ico:'🎬',num:'1069'},
+    {id:'us08',n:'HBO East',                ico:'🎭',num:'1068'},
+    {id:'us09',n:'HBO One',                 ico:'⭐',num:'1067'},
+    {id:'us10',n:'Travel Channel',          ico:'✈️',num:'1066'},
+    {id:'us11',n:'Cooking Channel',         ico:'👨‍🍳',num:'1065'},
+    {id:'us12',n:'Bloomberg',               ico:'📊',num:'1064'},
+    {id:'us13',n:'Cinemax',                 ico:'🎞',num:'1063'},
+    {id:'us14',n:'Tennis Channel',          ico:'🎾',num:'1062'},
+    {id:'us15',n:'Nat Geo',                 ico:'🌍',num:'1061'},
+    {id:'us16',n:'Nat Geo Wild',            ico:'🐆',num:'1060'},
+    {id:'us17',n:'BabyTV',                  ico:'👶',num:'1059'},
+    {id:'us18',n:'MLB Network',             ico:'⚾',num:'1058'},
+    {id:'us19',n:'TNT',                     ico:'💥',num:'1057'},
+    {id:'us20',n:'Bravo',                   ico:'👏',num:'1056'},
+    {id:'us21',n:'Food Network',            ico:'🍳',num:'1055'},
+    {id:'us22',n:'Fight Network',           ico:'🥊',num:'1054'},
+    {id:'us23',n:'DIY Network',             ico:'🔧',num:'1053'},
+    {id:'us24',n:'Discovery',               ico:'🔭',num:'1052'},
+    {id:'us25',n:'Fishing Channel',         ico:'🎣',num:'1051'},
+    {id:'us26',n:'World Fishing Network',   ico:'🐟',num:'1050'},
+    {id:'us27',n:'VH1',                     ico:'🎵',num:'1049'},
+    {id:'us28',n:'TLC',                     ico:'🌸',num:'1048'},
+    {id:'us29',n:'NHL Network',             ico:'🏒',num:'1047'},
+    {id:'us30',n:'Hallmark',                ico:'❤️',num:'1046'},
+    {id:'us31',n:'E!',                      ico:'✨',num:'1045'},
+    {id:'us32',n:'Syfy',                    ico:'🚀',num:'1044'},
+    {id:'us33',n:'HGTV',                    ico:'🏡',num:'1043'},
+    {id:'us34',n:'Golf Channel',            ico:'⛳',num:'1042'},
+    {id:'us35',n:'Law & Crime',             ico:'⚖️',num:'1041'},
+    {id:'us36',n:'MSNBC',                   ico:'📺',num:'1040'},
+    {id:'us37',n:'GolTV',                   ico:'⚽',num:'1039'},
+    {id:'us38',n:'TVG',                     ico:'🐎',num:'1038'},
+    {id:'us39',n:'TBS',                     ico:'😂',num:'1036'},
+    {id:'us40',n:'MTV',                     ico:'🎤',num:'1035'},
+    {id:'us41',n:'PBS',                     ico:'🎓',num:'1034'},
+    {id:'us42',n:'FX',                      ico:'🎬',num:'1030'},
+    {id:'us43',n:'Lifetime',                ico:'💜',num:'1028'},
+    {id:'us44',n:'BET',                     ico:'🎶',num:'1027'},
+    {id:'us45',n:'CNBC',                    ico:'💰',num:'1026'},
+    {id:'us46',n:'The CW',                  ico:'⚡',num:'1024'},
+    {id:'us47',n:'Animal Planet',           ico:'🦁',num:'1023'},
+    {id:'us48',n:'A&E',                     ico:'🔍',num:'1022'},
+    {id:'us49',n:'Freeform',                ico:'🌀',num:'1021'},
+    {id:'us50',n:'Game Show Network',       ico:'🎯',num:'1019'},
+    {id:'us51',n:'Investigation Discovery', ico:'🔎',num:'1017'},
+    {id:'us52',n:'Lifetime Movies',         ico:'🎥',num:'1016'},
+    {id:'us53',n:'Showtime',                ico:'🏆',num:'1013'},
+    {id:'us54',n:'Starz',                   ico:'⭐',num:'1012'},
+    {id:'us55',n:'USA Network',             ico:'🦅',num:'1010'},
+    {id:'us56',n:'Newsmax',                 ico:'📣',num:'1078'},
+    {id:'us57',n:'First TV',                ico:'1️⃣',num:'1079'},
+    {id:'us58',n:'People TV',               ico:'👥',num:'1080'},
+    {id:'us59',n:'Right Now',               ico:'⚡',num:'1081'},
+    {id:'us60',n:'Bloomberg TV',            ico:'📈',num:'1082'},
+    {id:'us61',n:'Nat Geographic',          ico:'🗺',num:'1089'},
+    {id:'us62',n:'Nat Geo Wild',            ico:'🦅',num:'1090'},
   ],
-  jp: [
-    { id:'jp01', n:'NHK 総合',   ico:'📡', num:'401' },
-    { id:'jp02', n:'NHK BS',     ico:'🛰', num:'402' },
-    { id:'jp03', n:'TBS',        ico:'🎌', num:'403' },
-    { id:'jp04', n:'フジTV',     ico:'🗼', num:'404' },
-    { id:'jp05', n:'テレ朝',     ico:'🌅', num:'405' },
-    { id:'jp06', n:'日本テレビ', ico:'🌸', num:'406' },
+  jp:[
+    {id:'jp01',n:'NHK 総合',  ico:'📡',num:'401'},
+    {id:'jp02',n:'NHK BS',    ico:'🛰',num:'402'},
+    {id:'jp03',n:'TBS',       ico:'🎌',num:'403'},
+    {id:'jp04',n:'フジTV',    ico:'🗼',num:'404'},
+    {id:'jp05',n:'テレ朝',    ico:'🌅',num:'405'},
+    {id:'jp06',n:'日本テレビ',ico:'🌸',num:'406'},
   ],
-  uk: [
-    { id:'uk01', n:'BBC One',   ico:'🎭', num:'501' },
-    { id:'uk02', n:'BBC Two',   ico:'📚', num:'502' },
-    { id:'uk03', n:'ITV',       ico:'🎬', num:'503' },
-    { id:'uk04', n:'Channel 4', ico:'4️⃣', num:'504' },
-    { id:'uk05', n:'Sky News',  ico:'☁️', num:'61'  },
+  uk:[
+    {id:'uk01',n:'BBC One',   ico:'🎭',num:'501'},
+    {id:'uk02',n:'BBC Two',   ico:'📚',num:'502'},
+    {id:'uk03',n:'ITV',       ico:'🎬',num:'503'},
+    {id:'uk04',n:'Channel 4', ico:'4️⃣',num:'504'},
+    {id:'uk05',n:'Sky News',  ico:'☁️',num:'61' },
   ],
-  kr: [
-    { id:'kr01', n:'KBS 1TV', ico:'🇰🇷', num:'601' },
-    { id:'kr02', n:'MBC TV',  ico:'🎵',  num:'602' },
-    { id:'kr03', n:'SBS',     ico:'⭐',  num:'603' },
-    { id:'kr04', n:'tvN',     ico:'🎭',  num:'604' },
-    { id:'kr05', n:'JTBC',    ico:'📺',  num:'605' },
+  kr:[
+    {id:'kr01',n:'KBS 1TV',ico:'🇰🇷',num:'601'},
+    {id:'kr02',n:'MBC TV', ico:'🎵', num:'602'},
+    {id:'kr03',n:'SBS',    ico:'⭐', num:'603'},
+    {id:'kr04',n:'tvN',    ico:'🎭', num:'604'},
+    {id:'kr05',n:'JTBC',   ico:'📺', num:'605'},
   ],
-  th: [
-    { id:'th01', n:'Thai PBS',     ico:'📡', num:'701' },
-    { id:'th02', n:'One31',        ico:'1️⃣', num:'702' },
-    { id:'th03', n:'Workpoint TV', ico:'🎪', num:'703' },
-    { id:'th04', n:'Amarin TV',    ico:'🌺', num:'704' },
+  th:[
+    {id:'th01',n:'Thai PBS',    ico:'📡',num:'701'},
+    {id:'th02',n:'One31',       ico:'1️⃣',num:'702'},
+    {id:'th03',n:'Workpoint TV',ico:'🎪',num:'703'},
+    {id:'th04',n:'Amarin TV',   ico:'🌺',num:'704'},
   ],
 };
 
-// ═══ PROGRAM SCHEDULE ════════════════════════════════════
-// Rich show pools per region/channel type
+// TVMaze network name → channel ID mapping
+const TVMAZE_MAP = {
+  'CNN':              'us02',
+  'Fox News Channel': 'us05',
+  'MSNBC':            'us36',
+  'MS NOW':           'us36',
+  'ABC':              'us03',
+  'NBC':              'us04',
+  'CBS':              null,
+  'Bloomberg TV':     'us12',
+  'Newsmax':          'us56',
+  'ESPN':             null,
+  'Nickelodeon':      null,
+  'Disney Junior':    null,
+};
+
+// ═══ SHOW POOLS ═══════════════════════════════════════════
 const SHOWS = {
-  tw: {
-    news:['台視晚間新聞','今日看世界','新聞最前線','全球新視野','新聞全方位','早安新聞','新聞空間','國際頭條','財經新聞','政經看民視'],
-    drama:['台灣囝仔','幸福滿屋','愛情來了','星願','天使的眼睛','青春好好','愛你一萬年','親愛的孩子','世間情','多情城市'],
-    variety:['綜藝大集合','快樂星期天','娛樂百分百','就是要你好看','今晚誰當家','食尚玩家','料理東西軍','型男大主廚'],
-    movie:['星期日電影院','週末大放送','電影不散場','影視精選','好電影週週看'],
-    info:['健康2.0','健康好生活','消費高手','生活公信力','我的未來不是夢'],
+  tw:{
+    news:['台視晚間新聞','今日看世界','新聞最前線','全球新視野','早安新聞','新聞空間','財經新聞'],
+    drama:['台灣囝仔','幸福滿屋','愛情來了','星願','天使的眼睛','愛你一萬年','世間情'],
+    variety:['綜藝大集合','快樂星期天','娛樂百分百','今晚誰當家','食尚玩家','型男大主廚'],
+    movie:['星期日電影院','週末大放送','電影不散場','影視精選'],
+    info:['健康2.0','健康好生活','消費高手','生活公信力'],
   },
-  hk: {
-    news:['六點半新聞','TVB新聞','新聞報道','香港早晨','晚間新聞','午間新聞'],
-    drama:['無線劇場','翡翠台電視劇','愛回家','萬千星輝','香港愛情故事','廉政行動'],
-    variety:['萬千星輝頒獎典禮','勁歌金曲','開心百分百','獎門人','香港就是這樣'],
-    movie:['星期五電影院','港產片精選','電影精選'],
+  hk:{
+    news:['六點半新聞','TVB新聞','新聞報道','香港早晨','晚間新聞'],
+    drama:['無線劇場','愛回家','萬千星輝','香港愛情故事','廉政行動'],
+    variety:['勁歌金曲','開心百分百','獎門人'],
+    movie:['港產片精選','電影精選'],
   },
-  cn: {
-    news:['新聞聯播','焦點訪談','朝聞天下','新聞直播間','面對面','看今天'],
-    drama:['甄嬛傳','星漢燦爛','夢華錄','知否知否','長月燼明','芸汐傳','慶餘年','古相思曲'],
-    variety:['快樂大本營','天天向上','我是歌手','奔跑吧','中國好聲音','披荊斬棘'],
-    movie:['電影頻道大片','國產電影精選','週末影院'],
+  cn:{
+    news:['新聞聯播','焦點訪談','朝聞天下','新聞直播間','面對面'],
+    drama:['甄嬛傳','星漢燦爛','夢華錄','知否知否','長月燼明','慶餘年'],
+    variety:['快樂大本營','天天向上','我是歌手','奔跑吧','中國好聲音'],
+    movie:['電影頻道大片','國產電影精選'],
   },
-  us: {
+  us:{
     news:['CNN Newsroom','The Situation Room','Anderson Cooper 360','Erin Burnett OutFront',
           'Fox & Friends','America\'s Newsroom','Hannity','Tucker Carlson','The Ingraham Angle',
-          'Morning Joe','Deadline: White House','The Rachel Maddow Show','Hardball',
+          'Morning Joe','Deadline: White House','The Rachel Maddow Show',
           'Squawk Box','Fast Money','Mad Money','Power Lunch','Bloomberg Markets'],
     drama:['Grey\'s Anatomy','NCIS','Law & Order: SVU','FBI','The Good Doctor','This Is Us',
-           'Blue Bloods','9-1-1','Station 19','Chicago PD','Chicago Fire','The Rookie',
-           'House of the Dragon','The Last of Us','Succession','White Lotus','Euphoria'],
+           'Blue Bloods','9-1-1','Chicago PD','Chicago Fire','The Rookie',
+           'House of the Dragon','The Last of Us','Succession','White Lotus'],
     comedy:['The Tonight Show','Late Show','Jimmy Kimmel Live','SNL','Abbott Elementary',
-            'The Office (Re)','Friends (Re)','Seinfeld (Re)','Big Bang Theory (Re)','Modern Family (Re)'],
+            'The Office','Friends','Big Bang Theory','Modern Family'],
     sports:['SportsCenter','NFL Live','Baseball Tonight','NBA Tonight','NHL Tonight',
             'Around the Horn','Pardon the Interruption','First Take'],
-    reality:['Top Chef','Project Runway','RuPaul\'s Drag Race','The Voice','American Idol',
-             'Survivor','The Amazing Race','Big Brother','Real Housewives','Keeping Up'],
+    reality:['Top Chef','Project Runway','RuPaul\'s Drag Race','The Voice','Survivor',
+             'The Amazing Race','Big Brother','Real Housewives'],
     sci:['Cosmos','Brain Games','Life Below Zero','Gold Rush','Deadliest Catch',
-         'Dirty Jobs','Mythbusters','How It\'s Made','Shark Week','Tiger King'],
-    movie:['Movie of the Week','Sunday Cinema','Blockbuster Night','HBO Feature','Showtime Movie'],
+         'Dirty Jobs','Mythbusters','How It\'s Made'],
+    movie:['Movie of the Week','Sunday Cinema','Blockbuster Night','HBO Feature'],
+    variety:['Entertainment Tonight','Access Hollywood','Extra'],
+    info:['Morning Express','Early Start','New Day'],
   },
-  jp: {
-    news:['NHKニュース7','ニュースウォッチ9','おはよう日本','サタデーウォッチ9'],
-    drama:['連続テレビ小説','大河ドラマ','土曜ドラマ','ドラマ10'],
-    variety:['笑点','世界ふしぎ発見！','ガキの使い','ダウンタウンDX'],
-    movie:['映画の時間','金曜ロードショー'],
+  jp:{
+    news:['NHKニュース7','ニュースウォッチ9','おはよう日本'],
+    drama:['連続テレビ小説','大河ドラマ','土曜ドラマ'],
+    variety:['笑点','世界ふしぎ発見！','ダウンタウンDX'],
+    movie:['金曜ロードショー'],
   },
-  uk: {
+  uk:{
     news:['BBC News at Six','BBC News at Ten','Newsnight','ITV Evening News'],
-    drama:['EastEnders','Casualty','Coronation Street','Call the Midwife','Sherlock'],
-    variety:['The Graham Norton Show','Strictly Come Dancing','The Great British Bake Off'],
+    drama:['EastEnders','Casualty','Coronation Street','Call the Midwife'],
+    variety:['The Graham Norton Show','Strictly Come Dancing'],
   },
-  kr: {
-    news:['KBS 뉴스 9','MBC 뉴스데스크','SBS 8뉴스','아침 뉴스타임'],
-    drama:['사랑의 불시착','이태원 클라쓰','더 글로리','나의 해방일지','무빙'],
-    variety:['런닝맨','놀면 뭐하니','무한도전','복면가왕','나는 가수다'],
+  kr:{
+    news:['KBS 뉴스 9','MBC 뉴스데스크','SBS 8뉴스'],
+    drama:['사랑의 불시착','이태원 클라쓰','더 글로리','나의 해방일지'],
+    variety:['런닝맨','놀면 뭐하니','복면가왕'],
   },
-  th: {
-    news:['ข่าวเย็น','ข่าวค่ำ','ข่าวเที่ยง','พาดหัวข่าว'],
-    drama:['บุพเพสันนิวาส','ลิขิตรัก','คู่กรรม','เพลิงพระนาง'],
-    variety:['มาตามนัด','หนึ่งในร้อย','ตีสิบ'],
+  th:{
+    news:['ข่าวเย็น','ข่าวค่ำ','ข่าวเที่ยง'],
+    drama:['บุพเพสันนิวาส','ลิขิตรัก','คู่กรรม'],
+    variety:['มาตามนัด','หนึ่งในร้อย'],
   },
 };
 
 const DESCS = {
-  news:  'Breaking news coverage and analysis of today\'s top stories from around the world. Live updates and expert commentary.',
-  drama: 'Compelling drama series featuring powerful performances and gripping storylines that keep you on the edge of your seat.',
-  comedy:'Laugh-out-loud entertainment with top comedians, celebrity guests, and the best sketches on television.',
-  sports:'Live sports coverage and analysis. Scores, highlights, expert opinions and in-depth reporting.',
-  reality:'Real people, real drama. Follow contestants and personalities as they compete, explore, and live life on screen.',
-  sci:   'Explore the wonders of science and nature. Fascinating documentaries that reveal the world around us.',
-  movie: 'Feature film presentation. Sit back and enjoy a full-length movie on your schedule.',
-  variety:'Entertainment for all ages. Singing, dancing, games, and celebrity interviews in one show.',
-  info:  'Health tips, lifestyle advice and useful information for your everyday life.',
+  news:   'Breaking news coverage and in-depth analysis of today\'s top stories from around the world.',
+  drama:  'Compelling drama series with powerful performances and gripping storylines.',
+  comedy: 'Laugh-out-loud entertainment with top comedians and celebrity guests.',
+  sports: 'Live sports coverage, scores, highlights, and expert analysis.',
+  reality:'Real people, real drama — competitions, adventures, and life on screen.',
+  sci:    'Fascinating documentaries exploring science, nature, and the world around us.',
+  movie:  'Feature film presentation — sit back and enjoy tonight\'s movie.',
+  variety:'Entertainment for all: singing, dancing, games, and celebrity interviews.',
+  info:   'Health tips, lifestyle advice, and useful information for everyday life.',
 };
 
-// Durations per show type (minutes)
 const DURS = {
-  news:   [30,60,60,30,60],
-  drama:  [60,60,60,90,60],
-  comedy: [30,30,60,30],
-  sports: [60,90,60,120],
-  reality:[60,60,90,60],
-  sci:    [60,60,90,60],
-  movie:  [90,120,120,90],
-  variety:[60,90,60],
-  info:   [30,60,30],
+  news:[30,60,60,30],drama:[60,60,90],comedy:[30,30,60],
+  sports:[60,90,120],reality:[60,60,90],sci:[60,90],
+  movie:[90,120],variety:[60,90],info:[30,60],
 };
 
-function pickType(chId, regionId, h) {
-  const isNews = chId.match(/0[0-4]$/) || ['cn03'].includes(chId) ||
-    ['us02','us03','us04','us05','us06','us12','us36','us56','us59','us60'].includes(chId);
-  if (isNews) return 'news';
-  const isMovie= ['us07','us08','us09','us13','us53','us54','us52'].includes(chId);
-  if (isMovie) return 'movie';
-  const isSports=['us14','us18','us29','us34','us37','us38'].includes(chId);
-  if (isSports) return 'sports';
-  const isSci  =['us15','us16','us24','us47'].includes(chId);
-  if (isSci) return 'sci';
-  const isReality=['us20','us21','us28','us33','us43','us48','us49','us50'].includes(chId);
-  if (isReality) return 'reality';
-  const isComedy=['us39','us40','us46','us49'].includes(chId);
-  if (isComedy) return 'comedy';
-  // Time-based fallback
-  if (h >= 6  && h < 9)  return 'info';
-  if (h >= 9  && h < 12) return 'variety';
-  if (h >= 12 && h < 14) return 'news';
-  if (h >= 14 && h < 18) return 'drama';
-  if (h >= 18 && h < 20) return 'news';
-  if (h >= 20 && h < 23) return 'drama';
+function pickType(chId, h) {
+  if (['us02','us03','us04','us05','us06','us12','us36','us45','us56','us59','us60'].includes(chId)) return 'news';
+  if (['us07','us08','us09','us13','us53','us54'].includes(chId)) return 'movie';
+  if (['us14','us18','us29','us34','us37','us38'].includes(chId)) return 'sports';
+  if (['us15','us16','us24','us47'].includes(chId)) return 'sci';
+  if (['us20','us21','us28','us33','us43'].includes(chId)) return 'reality';
+  if (['us39','us46','us49'].includes(chId)) return 'comedy';
+  if (h>=6&&h<9)   return 'info';
+  if (h>=9&&h<12)  return 'variety';
+  if (h>=12&&h<14) return 'news';
+  if (h>=14&&h<18) return 'drama';
+  if (h>=18&&h<20) return 'news';
+  if (h>=20&&h<23) return 'drama';
   return 'movie';
 }
 
 function buildSchedule(chId, regionId) {
   const pool = SHOWS[regionId] || SHOWS.tw;
-  const seed  = chId.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
-  const slots = [];
-  let minFromGridStart = 0;
-  const totalMins = (GRID_E - GRID_S) * 60;
-
-  let idx = seed % 100;
-  while (minFromGridStart < totalMins) {
-    const startH = GRID_S + Math.floor(minFromGridStart / 60);
-    const type   = pickType(chId, regionId, startH);
-    const durArr = DURS[type] || [60];
-    const dur    = durArr[(idx + Math.floor(minFromGridStart/30)) % durArr.length];
-    const shows  = pool[type] || pool.news || ['節目進行中'];
-    const title  = shows[(idx + Math.floor(minFromGridStart/60)) % shows.length];
-    const desc   = DESCS[type] || DESCS.news;
-    slots.push({ startMin: minFromGridStart, dur, title, type, desc });
-    minFromGridStart += dur;
-    idx = (idx + 7) % 100;
+  const seed = chId.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  const slots=[]; let cur=0;
+  const total=(GRID_E-GRID_S)*60;
+  let idx=seed%100;
+  while(cur<total){
+    const h=GRID_S+Math.floor(cur/60);
+    const type=pickType(chId,h);
+    const durArr=DURS[type]||[60];
+    const dur=durArr[(idx+Math.floor(cur/30))%durArr.length];
+    const showPool=pool[type]||pool.news||['節目播出中'];
+    const title=showPool[(idx+Math.floor(cur/60))%showPool.length];
+    const desc=DESCS[type]||DESCS.news;
+    slots.push({startMin:cur,dur,title,type,desc,real:false});
+    cur+=dur; idx=(idx+7)%100;
   }
   return slots;
 }
 
-// ═══ STATE ═══════════════════════════════════════════════
-let curRegion   = null;
-let selChIdx    = 0;
-let selProg     = null;
+// ═══ STATE ════════════════════════════════════════════════
+let curRegion=null, selChIdx=0, usTzOff=-4, usTzLabel='ET';
 
-// ═══ CLOCK ═══════════════════════════════════════════════
-function pad(n){ return String(n).padStart(2,'0'); }
-
-function updateClock() {
-  const n = new Date();
-  document.getElementById('clkHM').textContent   = `${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
-  document.getElementById('clkDate').textContent = n.toLocaleDateString('zh-TW',{month:'short',day:'numeric',weekday:'short'});
+// ═══ CLOCK ════════════════════════════════════════════════
+function pad(n){return String(n).padStart(2,'0');}
+function updateClock(){
+  const n=new Date();
+  document.getElementById('clkHM').textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
+  document.getElementById('clkDate').textContent=n.toLocaleDateString('zh-TW',{month:'short',day:'numeric',weekday:'short'});
 }
-updateClock();
-setInterval(updateClock,1000);
+updateClock(); setInterval(updateClock,1000);
 
-// ═══ LOCAL TIME HELPERS ══════════════════════════════════
-function localNow(regionId) {
-  const r = REGIONS[regionId];
-  try {
-    const s = new Date().toLocaleString('en-US',{timeZone:r.tz,
-      hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
-    const [h,m,sec] = s.split(':').map(Number);
-    return { h, m, totalMin: h*60+m };
-  } catch {
-    const now = new Date();
-    const utc = now.getTime() + now.getTimezoneOffset()*60000;
-    const loc = new Date(utc + r.off*3600000);
-    return { h:loc.getHours(), m:loc.getMinutes(), totalMin:loc.getHours()*60+loc.getMinutes() };
-  }
+// ═══ LOCAL TIME ════════════════════════════════════════════
+function localNow(rid){
+  const r=REGIONS[rid];
+  const off=(rid==='us')?usTzOff:r.off;
+  try{
+    // Use Intl for non-US; for US use our offset
+    if(rid!=='us'){
+      const s=new Date().toLocaleString('en-US',{timeZone:r.tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+      const[h,m]=s.split(':').map(Number);
+      return{h,m,totalMin:h*60+m};
+    }
+  }catch{}
+  const utc=new Date().getTime()+new Date().getTimezoneOffset()*60000;
+  const loc=new Date(utc+off*3600000);
+  return{h:loc.getHours(),m:loc.getMinutes(),totalMin:loc.getHours()*60+loc.getMinutes()};
 }
-
-function localTimeStr(regionId) {
-  const r = REGIONS[regionId];
-  try {
-    return new Date().toLocaleTimeString('zh-TW',{timeZone:r.tz,hour:'2-digit',minute:'2-digit',hour12:false});
-  } catch { return '--:--'; }
+function localTimeStr(rid){
+  const {h,m}=localNow(rid);
+  return`${pad(h)}:${pad(m)}`;
 }
 
-// ═══ NAVIGATION ══════════════════════════════════════════
-function goHome() {
-  curRegion = null;
+// ═══ TZ SELECTOR ══════════════════════════════════════════
+function setTZ(off,label){
+  usTzOff=off; usTzLabel=label;
+  document.querySelectorAll('.tz-pill').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tz'+label).classList.add('active');
+  document.getElementById('hdrSub').textContent=`當地時間 ${localTimeStr('us')} (${label})`;
+  if(curRegion==='us') buildEPG('us');
+}
+
+// ═══ NAVIGATION ═══════════════════════════════════════════
+function goHome(){
+  curRegion=null;
   document.getElementById('backBtn').classList.remove('show');
-  document.getElementById('hdrTitle').textContent = '📺 電視節目表';
-  document.getElementById('hdrSub').textContent   = '選擇地區查看節目';
+  document.getElementById('hdrTitle').textContent='📺 電視節目表';
+  document.getElementById('hdrSub').textContent='選擇地區查看節目';
   document.getElementById('pageHome').classList.add('active');
   document.getElementById('pageEPG').classList.remove('active');
   closeDetail();
 }
 
-function openRegion(rid) {
-  curRegion = rid;
-  const r = REGIONS[rid];
+function openRegion(rid){
+  curRegion=rid;
+  const r=REGIONS[rid];
   document.getElementById('backBtn').classList.add('show');
-  document.getElementById('hdrTitle').textContent = `${r.flag} ${r.name}`;
-  document.getElementById('hdrSub').textContent   = `當地時間 ${localTimeStr(rid)}`;
+  const tzLabel=rid==='us'?` (${usTzLabel})`:'';
+  document.getElementById('hdrTitle').textContent=`${r.flag} ${r.name}`;
+  document.getElementById('hdrSub').textContent=`當地時間 ${localTimeStr(rid)}${tzLabel}`;
   document.getElementById('pageHome').classList.remove('active');
   document.getElementById('pageEPG').classList.add('active');
-
+  // Show TZ pills only for US
+  const pills=document.getElementById('tzPills');
+  const label=document.getElementById('chGapLabel');
+  if(rid==='us'){pills.classList.add('show');label.style.display='none';}
+  else{pills.classList.remove('show');label.style.display='';}
   buildEPG(rid);
-  selChIdx = 0;
+  selChIdx=0;
   selectChannel(0);
 }
 
 // ═══ EPG BUILD ════════════════════════════════════════════
-function buildEPG(rid) {
-  const channels = CHANNELS[rid] || [];
-  const { totalMin: nowMin } = localNow(rid);
+function buildEPG(rid){
+  const channels=CHANNELS[rid]||[];
+  const {totalMin:nowMin}=localNow(rid);
 
-  // Build time header
-  const slotsEl = document.getElementById('timeSlots');
-  slotsEl.innerHTML = '';
-  for (let h = GRID_S; h < GRID_E; h++) {
-    for (let half = 0; half < 2; half++) {
-      const d = document.createElement('div');
-      d.className = 'ts' + (half===0?' h0':'');
-      d.style.width = SLOT_W + 'px';
-      d.textContent = half===0 ? `${pad(h%24)}:00` : `${pad(h%24)}:30`;
+  // Time header
+  const slotsEl=document.getElementById('timeSlots');
+  slotsEl.innerHTML='';
+  for(let h=GRID_S;h<GRID_E;h++){
+    for(let half=0;half<2;half++){
+      const d=document.createElement('div');
+      d.className='ts'+(half===0?' h0':'');
+      d.style.width=SLOT_W+'px';
+      d.textContent=half===0?`${pad(h%24)}:00`:`${pad(h%24)}:30`;
       slotsEl.appendChild(d);
     }
   }
 
-  // Build channel sidebar
-  const sidebar = document.getElementById('chSidebar');
-  sidebar.innerHTML = '';
-  channels.forEach((ch,i) => {
-    const sched = buildSchedule(ch.id, rid);
-    const nowRelMin = nowMin - GRID_S*60;
-    const cur = sched.find(s => s.startMin <= nowRelMin && s.startMin+s.dur > nowRelMin);
-    const div = document.createElement('div');
-    div.className = 'ch-cell';
-    div.dataset.idx = i;
-    div.innerHTML = `
-      <div class="ch-ico">${ch.ico}</div>
+  // Channel sidebar
+  const sidebar=document.getElementById('chSidebar');
+  sidebar.innerHTML='';
+  channels.forEach((ch,i)=>{
+    const sched=buildSchedule(ch.id,rid);
+    const nowRelMin=nowMin-GRID_S*60;
+    const cur=sched.find(s=>s.startMin<=nowRelMin&&s.startMin+s.dur>nowRelMin);
+    const div=document.createElement('div');
+    div.className='ch-cell'; div.dataset.idx=i;
+    div.innerHTML=`<div class="ch-ico">${ch.ico}</div>
       <div class="ch-txt">
         <div class="ch-n">${ch.n}</div>
         <div class="ch-np">${cur?cur.title:'—'}</div>
       </div>
       <div class="ch-live-dot"></div>`;
-    div.onclick = () => selectChannel(i);
+    div.onclick=()=>selectChannel(i);
     sidebar.appendChild(div);
   });
 
-  // Build program grid
-  const grid = document.getElementById('progGrid');
-  // Remove old rows (keep now-line)
+  // Program grid
+  const grid=document.getElementById('progGrid');
   Array.from(grid.querySelectorAll('.prog-row')).forEach(r=>r.remove());
+  const totalW=(GRID_E-GRID_S)*2*SLOT_W;
+  grid.style.width=totalW+'px';
+  grid.style.minHeight=(channels.length*ROW_H)+'px';
 
-  const totalW = (GRID_E - GRID_S) * 2 * SLOT_W;
-  grid.style.width  = totalW + 'px';
-  grid.style.minHeight = (channels.length * ROW_H) + 'px';
+  channels.forEach((ch,i)=>{
+    const sched=buildSchedule(ch.id,rid);
+    const row=document.createElement('div');
+    row.className='prog-row'; row.dataset.chIdx=i;
+    const nowRelMin=nowMin-GRID_S*60;
 
-  channels.forEach((ch,i) => {
-    const sched = buildSchedule(ch.id, rid);
-    const row = document.createElement('div');
-    row.className = 'prog-row';
-    row.dataset.chIdx = i;
-    const nowRelMin = nowMin - GRID_S*60;
+    sched.forEach((prog,pi)=>{
+      if(prog.startMin>=(GRID_E-GRID_S)*60)return;
+      const dur=Math.min(prog.dur,(GRID_E-GRID_S)*60-prog.startMin);
+      const w=dur*MIN_PX;
+      const isLive=prog.startMin<=nowRelMin&&prog.startMin+prog.dur>nowRelMin;
+      const isPast=prog.startMin+prog.dur<=nowRelMin;
 
-    sched.forEach((prog, pi) => {
-      if (prog.startMin >= (GRID_E - GRID_S)*60) return;
-      const dur = Math.min(prog.dur, (GRID_E-GRID_S)*60 - prog.startMin);
-      const w = dur * MIN_PX;
-      const isLive = prog.startMin <= nowRelMin && prog.startMin+prog.dur > nowRelMin;
-      const isPast = prog.startMin + prog.dur <= nowRelMin;
+      const pb=document.createElement('div');
+      pb.className='pb'+(isLive?' live':'')+(isPast?' past':'');
+      pb.style.width=w+'px';
+      pb.dataset.chIdx=i; pb.dataset.progIdx=pi;
+      pb.dataset.start=prog.startMin; // for TVMaze matching
 
-      const pb = document.createElement('div');
-      pb.className = 'pb' + (isLive?' live':'') + (isPast?' past':'');
-      pb.style.width = w + 'px';
-      pb.dataset.chIdx  = i;
-      pb.dataset.progIdx= pi;
+      const sh=pad((GRID_S+Math.floor(prog.startMin/60))%24), sm=pad(prog.startMin%60);
+      const eMin=prog.startMin+prog.dur;
+      const eh=pad((GRID_S+Math.floor(eMin/60))%24), em=pad(eMin%60);
 
-      let timeStr = `${pad((GRID_S + Math.floor(prog.startMin/60))%24)}:${pad(prog.startMin%60)}`;
-      let endMin  = prog.startMin + prog.dur;
-      let endStr  = `${pad((GRID_S + Math.floor(endMin/60))%24)}:${pad(endMin%60)}`;
+      pb.innerHTML=`<div class="pb-title">${prog.title}</div><div class="pb-time">${sh}:${sm}–${eh}:${em}</div>`;
 
-      pb.innerHTML = `<div class="pb-title">${prog.title}</div><div class="pb-time">${timeStr}–${endStr}</div>`;
-
-      if (isLive) {
-        const elapsed = nowRelMin - prog.startMin;
-        const pct = Math.min(100, (elapsed / prog.dur)*100);
-        const bar = document.createElement('div');
-        bar.className = 'pb-bar';
-        bar.style.width = pct+'%';
+      if(isLive){
+        const pct=Math.min(100,((nowRelMin-prog.startMin)/prog.dur)*100);
+        const bar=document.createElement('div'); bar.className='pb-bar'; bar.style.width=pct+'%';
         pb.appendChild(bar);
       }
 
-      pb.onclick = (e) => {
+      pb.onclick=(e)=>{
         e.stopPropagation();
         selectChannel(i);
-        showDetail(ch, prog, isLive);
+        showDetail(ch,prog,isLive,false);
         document.querySelectorAll('.pb.sel-prog').forEach(el=>el.classList.remove('sel-prog'));
         pb.classList.add('sel-prog');
       };
@@ -788,83 +772,191 @@ function buildEPG(rid) {
   });
 
   // NOW line
-  const nowLineEl = document.getElementById('nowLine');
-  const nowX = (nowMin - GRID_S*60) * MIN_PX;
-  nowLineEl.style.left = Math.max(0, nowX) + 'px';
+  const nowX=(nowMin-GRID_S*60)*MIN_PX;
+  document.getElementById('nowLine').style.left=Math.max(0,nowX)+'px';
 
-  // Sync scrolling
-  const progScroll = document.getElementById('progScroll');
-  const timeSlotsWrap = document.getElementById('timeSlotsWrap');
-  const chSidebar = document.getElementById('chSidebar');
-
-  progScroll.onscroll = () => {
-    timeSlotsWrap.querySelector('.time-slots').style.transform = `translateX(-${progScroll.scrollLeft}px)`;
-    chSidebar.scrollTop = progScroll.scrollTop;
+  // Scroll sync
+  const progScroll=document.getElementById('progScroll');
+  const timeSlotsWrap=document.getElementById('timeSlotsWrap');
+  const chSidebar=document.getElementById('chSidebar');
+  progScroll.onscroll=()=>{
+    timeSlotsWrap.querySelector('.time-slots').style.transform=`translateX(-${progScroll.scrollLeft}px)`;
+    chSidebar.scrollTop=progScroll.scrollTop;
   };
-  chSidebar.onscroll = () => {
-    progScroll.scrollTop = chSidebar.scrollTop;
-  };
+  chSidebar.onscroll=()=>{ progScroll.scrollTop=chSidebar.scrollTop; };
 
-  // Scroll to now (center in view)
-  requestAnimationFrame(() => {
-    const viewW = progScroll.clientWidth;
-    progScroll.scrollLeft = Math.max(0, nowX - viewW/3);
+  // Scroll to now
+  requestAnimationFrame(()=>{
+    const viewW=progScroll.clientWidth;
+    progScroll.scrollLeft=Math.max(0,nowX-viewW/3);
+  });
+
+  // Fetch TVMaze for US
+  if(rid==='us') fetchTVMaze();
+}
+
+// ═══ TVMAZE INTEGRATION ═══════════════════════════════════
+async function fetchTVMaze(){
+  try{
+    const today=new Date().toISOString().split('T')[0];
+    const res=await fetch(`https://api.tvmaze.com/schedule?country=US&date=${today}`);
+    if(!res.ok)return;
+    const data=await res.json();
+    applyTVMazeData(data);
+  }catch(e){
+    console.warn('TVMaze fetch failed:',e);
+  }
+}
+
+function applyTVMazeData(items){
+  const channels=CHANNELS['us'];
+  // Group items by channel
+  const byChIdx={};
+
+  items.forEach(item=>{
+    const netName=item.show?.network?.name||item.show?.webChannel?.name||'';
+    const chId=TVMAZE_MAP[netName];
+    if(!chId)return;
+    const chIdx=channels.findIndex(c=>c.id===chId);
+    if(chIdx<0)return;
+
+    // Parse airstamp to local US time using our selected offset
+    let gridMin;
+    try{
+      const utcMs=new Date(item.airstamp).getTime();
+      const localMs=utcMs+usTzOff*3600000;
+      const d=new Date(localMs);
+      const h=d.getUTCHours(), m=d.getUTCMinutes();
+      gridMin=h*60+m-GRID_S*60;
+    }catch{return;}
+
+    if(gridMin<0||gridMin>=(GRID_E-GRID_S)*60)return;
+
+    if(!byChIdx[chIdx]) byChIdx[chIdx]=[];
+    byChIdx[chIdx].push({
+      gridMin,
+      dur:item.runtime||60,
+      name:item.show?.name||item.name||'',
+      epName:item.name||'',
+      desc:item.show?.summary?.replace(/<[^>]+>/g,'')||DESCS.news,
+      type:'news',
+    });
+  });
+
+  // Patch DOM
+  Object.entries(byChIdx).forEach(([chIdx,progs])=>{
+    const row=document.querySelector(`.prog-row[data-ch-idx="${chIdx}"]`);
+    if(!row)return;
+    const pbs=Array.from(row.querySelectorAll('.pb'));
+
+    progs.forEach(prog=>{
+      // Find pb that overlaps this program's start
+      let x=0;
+      for(const pb of pbs){
+        const pbStart=parseInt(pb.dataset.start||0);
+        const pbW=parseFloat(pb.style.width||0);
+        const pbDur=pbW/MIN_PX;
+        const pbEnd=pbStart+pbDur;
+        // Overlap check: prog starts within this block
+        if(prog.gridMin>=pbStart&&prog.gridMin<pbEnd){
+          const endMin=prog.gridMin+prog.dur;
+          const sh=pad((GRID_S+Math.floor(prog.gridMin/60))%24), sm=pad(prog.gridMin%60);
+          const eh=pad((GRID_S+Math.floor(endMin/60))%24),   em=pad(endMin%60);
+          const showName=prog.name+(prog.epName&&prog.epName!==prog.name?` · ${prog.epName}`:'');
+
+          pb.classList.add('verified');
+          pb.querySelector('.pb-title').textContent=showName;
+          pb.querySelector('.pb-time').textContent=`${sh}:${sm}–${eh}:${em}`;
+
+          // Add verified badge if not already there
+          if(!pb.querySelector('.verified-badge')){
+            const badge=document.createElement('div');
+            badge.className='verified-badge'; badge.textContent='✓ LIVE DATA';
+            pb.appendChild(badge);
+          }
+
+          // Update detail panel if this is currently selected
+          if(pb.classList.contains('sel-prog')){
+            const chIdx2=parseInt(pb.dataset.chIdx);
+            const ch=channels[chIdx2];
+            if(ch) showDetailFromVerified(ch,prog);
+          }
+
+          // Update sidebar current program name
+          const chCell=document.querySelector(`.ch-cell[data-idx="${chIdx}"]`);
+          if(chCell){
+            const nowRelMin=localNow('us').totalMin-GRID_S*60;
+            if(prog.gridMin<=nowRelMin&&prog.gridMin+prog.dur>nowRelMin){
+              const np=chCell.querySelector('.ch-np');
+              if(np) np.textContent=prog.name;
+            }
+          }
+          break;
+        }
+      }
+    });
   });
 }
 
-function selectChannel(idx) {
-  selChIdx = idx;
-  document.querySelectorAll('.ch-cell').forEach((el,i)=>{
-    el.classList.toggle('sel', i===idx);
-  });
-  // Scroll sidebar to show selected
-  const cell = document.querySelector(`.ch-cell[data-idx="${idx}"]`);
-  if (cell) cell.scrollIntoView({block:'nearest',behavior:'smooth'});
+function showDetailFromVerified(ch,prog){
+  const r=REGIONS['us'];
+  const endMin=prog.gridMin+prog.dur;
+  const sh=pad((GRID_S+Math.floor(prog.gridMin/60))%24), sm=pad(prog.gridMin%60);
+  const eh=pad((GRID_S+Math.floor(endMin/60))%24), em=pad(endMin%60);
+
+  document.getElementById('dpIco').textContent=ch.ico;
+  document.getElementById('dpCh').textContent=`${r.flag} ${r.name} · CH ${ch.num} · ${ch.n}`;
+  document.getElementById('dpTitle').textContent=prog.name+(prog.epName&&prog.epName!==prog.name?`\n${prog.epName}`:'');
+  document.getElementById('dpMeta').textContent=`🕐 ${sh}:${sm} – ${eh}:${em}  ·  ${prog.dur} 分鐘`;
+  document.getElementById('dpDesc').textContent=prog.desc;
+  const tagsEl=document.getElementById('dpTags');
+  tagsEl.innerHTML='<span class="tag real-tag">✅ 真實節目資料</span><span class="tag live-tag">🔴 直播中</span>';
 }
 
-// ═══ DETAIL PANEL ════════════════════════════════════════
-function showDetail(ch, prog, isLive) {
-  const rid  = curRegion;
-  const r    = REGIONS[rid];
-  const startH  = (GRID_S + Math.floor(prog.startMin/60)) % 24;
-  const startM  = prog.startMin % 60;
-  const endMin  = prog.startMin + prog.dur;
-  const endH    = (GRID_S + Math.floor(endMin/60)) % 24;
-  const endM    = endMin % 60;
-  const timeStr = `${pad(startH)}:${pad(startM)} – ${pad(endH)}:${pad(endM)}`;
+// ═══ SELECT CHANNEL ════════════════════════════════════════
+function selectChannel(idx){
+  selChIdx=idx;
+  document.querySelectorAll('.ch-cell').forEach((el,i)=>el.classList.toggle('sel',i===idx));
+  const cell=document.querySelector(`.ch-cell[data-idx="${idx}"]`);
+  if(cell)cell.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
 
-  document.getElementById('dpIco').textContent   = ch.ico;
-  document.getElementById('dpCh').textContent    = `${r.flag} ${r.name}  ·  CH ${ch.num}  ·  ${ch.n}`;
-  document.getElementById('dpTitle').textContent = prog.title;
-  document.getElementById('dpMeta').textContent  = `🕐 ${timeStr}  ·  ${prog.dur} 分鐘`;
-  document.getElementById('dpDesc').textContent  = prog.desc;
+// ═══ DETAIL PANEL ══════════════════════════════════════════
+function showDetail(ch,prog,isLive,isVerified){
+  const rid=curRegion, r=REGIONS[rid];
+  const endMin=prog.startMin+prog.dur;
+  const sh=pad((GRID_S+Math.floor(prog.startMin/60))%24), sm=pad(prog.startMin%60);
+  const eh=pad((GRID_S+Math.floor(endMin/60))%24), em=pad(endMin%60);
 
-  const tagsEl = document.getElementById('dpTags');
-  tagsEl.innerHTML = '';
-  if (isLive) tagsEl.insertAdjacentHTML('beforeend','<span class="tag live-tag">🔴 直播中</span>');
-  tagsEl.insertAdjacentHTML('beforeend',`<span class="tag">${prog.type}</span>`);
-  tagsEl.insertAdjacentHTML('beforeend',`<span class="tag">${prog.dur} min</span>`);
-
+  document.getElementById('dpIco').textContent=ch.ico;
+  document.getElementById('dpCh').textContent=`${r.flag} ${r.name} · CH ${ch.num} · ${ch.n}`;
+  document.getElementById('dpTitle').textContent=prog.title;
+  document.getElementById('dpMeta').textContent=`🕐 ${sh}:${sm} – ${eh}:${em}  ·  ${prog.dur} 分鐘`;
+  document.getElementById('dpDesc').textContent=prog.desc;
+  const tagsEl=document.getElementById('dpTags');
+  tagsEl.innerHTML='';
+  if(isVerified)tagsEl.insertAdjacentHTML('beforeend','<span class="tag real-tag">✅ 真實節目資料</span>');
+  if(isLive)tagsEl.insertAdjacentHTML('beforeend','<span class="tag live-tag">🔴 直播中</span>');
+  tagsEl.insertAdjacentHTML('beforeend',`<span class="tag">${prog.type}</span><span class="tag">${prog.dur} min</span>`);
   document.getElementById('detailPanel').classList.add('open');
 }
 
-function closeDetail() {
+function closeDetail(){
   document.getElementById('detailPanel').classList.remove('open');
   document.querySelectorAll('.pb.sel-prog').forEach(el=>el.classList.remove('sel-prog'));
 }
 
-// Close detail on grid background click
-document.getElementById('progScroll').addEventListener('click', e => {
-  if (e.target === document.getElementById('progScroll') ||
-      e.target === document.getElementById('progGrid')) closeDetail();
+document.getElementById('progScroll').addEventListener('click',e=>{
+  if(e.target===document.getElementById('progScroll')||
+     e.target===document.getElementById('progGrid'))closeDetail();
 });
 
-// ═══ UPDATE EVERY MINUTE ════════════════════════════════
-setInterval(() => {
-  if (curRegion) {
-    document.getElementById('hdrSub').textContent = `當地時間 ${localTimeStr(curRegion)}`;
+setInterval(()=>{
+  if(curRegion){
+    const tz=curRegion==='us'?` (${usTzLabel})`:'';
+    document.getElementById('hdrSub').textContent=`當地時間 ${localTimeStr(curRegion)}${tz}`;
   }
-}, 60000);
+},60000);
 </script>
 </body>
 </html>
