@@ -1325,21 +1325,31 @@ function _applyTWProgs(chIdx,progs){
   });
 }
 
+// Shared CORS proxy: codetabs bypasses Cloudflare; allorigins as fallback.
+async function _proxyGet(targetUrl){
+  const enc=encodeURIComponent(targetUrl);
+  // 1. codetabs (raw passthrough, bypasses Cloudflare)
+  try{
+    const r=await fetch(`https://api.codetabs.com/v1/proxy/?quest=${enc}`,{signal:AbortSignal.timeout(12000)});
+    if(r.ok){
+      const t=await r.text();
+      if(t&&!t.includes('Just a moment'))return t;
+    }
+  }catch(e){}
+  // 2. allorigins (JSON-wrapped fallback)
+  try{
+    const r=await fetch(`https://api.allorigins.win/get?url=${enc}`,{signal:AbortSignal.timeout(12000)});
+    if(r.ok){
+      const j=await r.json();
+      if(j.contents&&!j.contents.includes('Just a moment'))return j.contents;
+    }
+  }catch(e){}
+  throw new Error('proxy failed');
+}
+
 async function _fetchTWChannel(tvgoId){
   if(TWTVGO_CACHE[tvgoId])return TWTVGO_CACHE[tvgoId];
-  const url=encodeURIComponent(`https://tvking.funorange.com.tw/channel/${tvgoId}`);
-  let html=null;
-  try{
-    const r=await fetch(`https://corsproxy.io/?url=${url}`,{signal:AbortSignal.timeout(9000)});
-    if(r.ok)html=await r.text();
-  }catch(e){}
-  if(!html){
-    try{
-      const r=await fetch(`https://api.allorigins.win/get?url=${url}`,{signal:AbortSignal.timeout(9000)});
-      if(r.ok){const j=await r.json();html=j.contents;}
-    }catch(e){}
-  }
-  if(!html)throw new Error('proxy failed');
+  const html=await _proxyGet(`https://tvking.funorange.com.tw/channel/${tvgoId}`);
   const progs=_parseTWSchedule(html);
   TWTVGO_CACHE[tvgoId]=progs;
   return progs;
@@ -1481,21 +1491,7 @@ function _applyUSProgs(chIdx,progs){
 
 async function _fetchSlug(slug){
   if(USTV_CACHE[slug])return USTV_CACHE[slug];
-  const url=encodeURIComponent(`https://us-tv-guide.com/tv-guide-${slug}/`);
-  let html=null;
-  // Try corsproxy.io
-  try{
-    const r=await fetch(`https://corsproxy.io/?url=${url}`,{signal:AbortSignal.timeout(9000)});
-    if(r.ok)html=await r.text();
-  }catch(e){}
-  // Fallback: allorigins
-  if(!html){
-    try{
-      const r=await fetch(`https://api.allorigins.win/get?url=${url}`,{signal:AbortSignal.timeout(9000)});
-      if(r.ok){const j=await r.json();html=j.contents;}
-    }catch(e){}
-  }
-  if(!html)throw new Error('proxy failed');
+  const html=await _proxyGet(`https://us-tv-guide.com/tv-guide-${slug}/`);
   const progs=_parseUSTVHtml(html);
   USTV_CACHE[slug]=progs;
   return progs;
@@ -1511,7 +1507,7 @@ async function fetchAllUSData(){
     slugMap[slug].push(idx);
   });
   const entries=Object.entries(slugMap);
-  const BATCH=8;
+  const BATCH=4; // codetabs rate-limits ~5 req/s; keep batches small
   let loaded=0;
   const hdrSub=document.getElementById('hdrSub');
   for(let i=0;i<entries.length;i+=BATCH){
@@ -1527,6 +1523,7 @@ async function fetchAllUSData(){
         console.warn('ustv',slug,e.message);
       }
     }));
+    if(i+BATCH<entries.length)await new Promise(r=>setTimeout(r,250)); // throttle
   }
   if(hdrSub&&curRegion==='us')
     hdrSub.textContent=`當地時間 ${localTimeStr('us')} (${usTzLabel}) · 節目資料已更新`;
