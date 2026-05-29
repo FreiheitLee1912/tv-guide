@@ -272,7 +272,7 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
         <div class="flag">🇨🇳</div><div class="region-name">中國大陸</div><div class="region-cnt">8 個頻道</div>
       </div>
       <div class="region-card" onclick="openRegion('us')">
-        <div class="flag">🇺🇸</div><div class="region-name">美國</div><div class="region-cnt">62 個頻道</div>
+        <div class="flag">🇺🇸</div><div class="region-name">美國</div><div class="region-cnt">145 個頻道</div>
       </div>
       <div class="region-card" onclick="openRegion('jp')">
         <div class="flag">🇯🇵</div><div class="region-name">日本</div><div class="region-cnt">6 個頻道</div>
@@ -447,6 +447,90 @@ const CHANNELS = {
     {id:'us60',n:'Bloomberg TV',            ico:'📈',num:'1082'},
     {id:'us61',n:'Nat Geographic',          ico:'🗺',num:'1089'},
     {id:'us62',n:'Nat Geo Wild',            ico:'🦅',num:'1090'},
+    // ── Extra US Pack ──────────────────────
+    {id:'us63', n:'HGTV',                  ico:'🏡',num:'1076'},
+    {id:'us64', n:'Cinemax',               ico:'🎞',num:'1091'},
+    {id:'us65', n:'IFC',                   ico:'🎬',num:'1219'},
+    {id:'us66', n:'ESPN News',             ico:'📡',num:'1218'},
+    {id:'us67', n:'CBS Sports',            ico:'🏈',num:'1217'},
+    {id:'us68', n:'Fight BOX',             ico:'🥊',num:'1216'},
+    {id:'us69', n:'Outdoor Channel',       ico:'🌲',num:'1213'},
+    {id:'us70', n:'SEC Network',           ico:'🏈',num:'1212'},
+    {id:'us71', n:'PBS Kids',              ico:'👦',num:'1211'},
+    {id:'us72', n:'WGN America',           ico:'📺',num:'1209'},
+    {id:'us73', n:'FX',                    ico:'🎬',num:'1208'},
+    {id:'us74', n:'Fuse',                  ico:'🎸',num:'1205'},
+    {id:'us75', n:'FX Movie',              ico:'🎥',num:'1201'},
+    {id:'us76', n:'Comet TV',              ico:'☄️',num:'1200'},
+    {id:'us77', n:'CNN USA',               ico:'🔴',num:'1220'},
+    {id:'us78', n:'FOX',                   ico:'🦊',num:'1222'},
+    {id:'us79', n:'CNBC',                  ico:'💰',num:'1223'},
+    {id:'us80', n:'5 Star Max',            ico:'⭐',num:'1224'},
+    {id:'us81', n:'Action Max',            ico:'💥',num:'1225'},
+    {id:'us82', n:'MoreMax',               ico:'🎭',num:'1226'},
+    {id:'us83', n:'Hallmark Movies',       ico:'❤️',num:'1227'},
+    {id:'us84', n:'TCM',                   ico:'🎞',num:'1230'},
+    {id:'us85', n:'Starz in Black',        ico:'⬛',num:'1231'},
+    {id:'us86', n:'ESPN 1',                ico:'🏆',num:'1232'},
+    {id:'us87', n:'ESPN 2',                ico:'🏅',num:'1233'},
+    {id:'us88', n:'NBC Sports',            ico:'🏟',num:'1234'},
+    {id:'us89', n:'NBA TV US',             ico:'🏀',num:'1235'},
+    {id:'us90', n:'FOX Sports 1',          ico:'🦊',num:'1236'},
+    {id:'us91', n:'FOX Sports 2',          ico:'🦊',num:'1237'},
+    {id:'us92', n:'NFL Network',           ico:'🏈',num:'1238'},
+    {id:'us93', n:'Golf Channel',          ico:'⛳',num:'1240'},
+    {id:'us94', n:'WWE Network',           ico:'🤼',num:'1241'},
+    {id:'us95', n:'UFC PASS',              ico:'🥋',num:'1242'},
+    {id:'us96', n:'beIN Sports USA',       ico:'⚽',num:'1243'},
+    {id:'us97', n:'ESPN U',                ico:'🎓',num:'1246'},
+    {id:'us98', n:'Discovery Channel',     ico:'🔭',num:'1247'},
+    {id:'us99', n:'National Geographic',   ico:'🌍',num:'1249'},
+    {id:'us100',n:'Animal Planet',         ico:'🦁',num:'1251'},
+    {id:'us101',n:'History Channel',       ico:'🏛',num:'1254'},
+    {id:'us102',n:'Smithsonian Channel',   ico:'🏺',num:'1255'},
+    {id:'us103',n:'TLC',                   ico:'🌸',num:'1256'},
+    {id:'us104',n:'Disney Channel',        ico:'🏰',num:'1257'},
+    {id:'us105',n:'Disney XD',             ico:'⚡',num:'1259'},
+    {id:'us106',n:'Disney Junior',         ico:'🌟',num:'1260'},
+    {id:'us107',n:'Cartoon Network',       ico:'🎪',num:'1261'},
+    {id:'us108',n:'Nick Jr.',              ico:'🧒',num:'1262'},
+    {id:'us109',n:'Boomerang',             ico:'🪃',num:'1264'},
+    {id:'us110',n:'Universal Kids',        ico:'🎡',num:'1265'},
+    {id:'us111',n:'CBS',                   ico:'👁',num:'1266'},
+    {id:'us112',n:'The CW',                ico:'⚡',num:'1267'},
+    {id:'us113',n:'E!',                    ico:'✨',num:'1268'},
+    {id:'us114',n:'Lifetime US',           ico:'💜',num:'1270'},
+    {id:'us115',n:'A&E',                   ico:'🔍',num:'1274'},
+    {id:'us116',n:'WE tv',                 ico:'💃',num:'1275'},
+    {id:'us117',n:'USA Network',           ico:'🦅',num:'1277'},
+    {id:'us118',n:'VH1',                   ico:'🎵',num:'1278'},
+    {id:'us119',n:'OWN',                   ico:'📺',num:'1281'},
+    {id:'us120',n:'GSN',                   ico:'🎯',num:'1283'},
+    {id:'us121',n:'Cooking Channel',       ico:'🍳',num:'1284'},
+    {id:'us122',n:'FYI',                   ico:'💡',num:'1286'},
+    {id:'us123',n:'Baby TV',               ico:'👶',num:'1288'},
+    {id:'us124',n:'TVB 1',                 ico:'📺',num:'1289'},
+    {id:'us125',n:'TVB Drama',             ico:'🎭',num:'1290'},
+    {id:'us126',n:'TVB J1',                ico:'🎌',num:'1291'},
+    {id:'us127',n:'TVB Entertainment',     ico:'💎',num:'1292'},
+    {id:'us128',n:'Now TV',                ico:'📡',num:'1293'},
+    {id:'us129',n:'MSNBC',                 ico:'📰',num:'1294'},
+    {id:'us130',n:'Weather Nation',        ico:'🌦',num:'1295'},
+    {id:'us131',n:'Bloomberg',             ico:'📊',num:'1296'},
+    {id:'us132',n:'Fox Business',          ico:'💹',num:'1297'},
+    {id:'us133',n:'HBO Comedy',            ico:'😂',num:'1298'},
+    {id:'us134',n:'HBO 1 US',              ico:'🎬',num:'1299'},
+    {id:'us135',n:'HBO 2 US',              ico:'🎭',num:'1300'},
+    {id:'us136',n:'HBO Signature',         ico:'✍️',num:'1301'},
+    {id:'us137',n:'HBO Family',            ico:'👨‍👩‍👧',num:'1302'},
+    {id:'us138',n:'Showtime 1',            ico:'🏆',num:'1303'},
+    {id:'us139',n:'Showtime 2',            ico:'🥇',num:'1304'},
+    {id:'us140',n:'ShowCase US',           ico:'🎪',num:'1305'},
+    {id:'us141',n:'Starz Comedy',          ico:'😄',num:'1306'},
+    {id:'us142',n:'Starz Edge',            ico:'⚔️',num:'1308'},
+    {id:'us143',n:'Starz Kids & Family',   ico:'🧒',num:'1309'},
+    {id:'us144',n:'Starz Encore',          ico:'🎬',num:'1310'},
+    {id:'us145',n:'Starz Encore Westerns', ico:'🤠',num:'1311'},
   ],
   jp:[
     {id:'jp01',n:'NHK 総合',  ico:'📡',num:'401'},
@@ -481,17 +565,62 @@ const CHANNELS = {
 // TVMaze network name → channel ID mapping
 const TVMAZE_MAP = {
   'CNN':              'us02',
+  'CNN USA':          'us77',
   'Fox News Channel': 'us05',
   'MSNBC':            'us36',
   'MS NOW':           'us36',
   'ABC':              'us03',
   'NBC':              'us04',
-  'CBS':              null,
-  'Bloomberg TV':     'us12',
+  'CBS':              'us111',
+  'FOX':              'us78',
+  'Bloomberg TV':     'us60',
   'Newsmax':          'us56',
   'ESPN':             null,
+  'ESPN2':            'us87',
+  'ESPN News':        'us66',
+  'CBS Sports Network':'us67',
+  'NFL Network':      'us92',
+  'NBA TV':           'us89',
   'Nickelodeon':      null,
-  'Disney Junior':    null,
+  'Disney Channel':   'us104',
+  'Disney Junior':    'us106',
+  'Disney XD':        'us105',
+  'Cartoon Network':  'us107',
+  'Discovery Channel':'us98',
+  'History':          'us101',
+  'Animal Planet':    'us100',
+  'National Geographic Channel':'us99',
+  'Nat Geo Wild':     'us62',
+  'TLC':              'us103',
+  'HGTV':             'us63',
+  'Food Network':     'us21',
+  'Cooking Channel':  'us121',
+  'Bravo':            'us20',
+  'E!':               'us113',
+  'USA Network':      'us117',
+  'Syfy':             'us32',
+  'FX':               'us73',
+  'FXX':              null,
+  'TBS':              'us39',
+  'TNT':              'us19',
+  'A&E':              'us115',
+  'Lifetime':         'us114',
+  'Hallmark Channel': 'us30',
+  'Hallmark Movies':  'us83',
+  'VH1':              'us118',
+  'MTV':              'us40',
+  'BET':              'us44',
+  'OWN':              'us119',
+  'WE tv':            'us116',
+  'PBS':              'us41',
+  'The CW':           'us112',
+  'IFC':              'us65',
+  'Fuse':             'us74',
+  'TCM':              'us84',
+  'Investigation Discovery':'us51',
+  'ID':               'us51',
+  'Game Show Network':'us50',
+  'GSN':              'us120',
 };
 
 // ═══ SHOW POOLS ═══════════════════════════════════════════
@@ -576,13 +705,29 @@ const DURS = {
   movie:[90,120],variety:[60,90],info:[30,60],
 };
 
+const TYPE_MAP = {
+  news:    ['us02','us03','us04','us05','us06','us12','us36','us45','us56','us59','us60',
+            'us77','us78','us79','us129','us130','us131','us132','us111'],
+  movie:   ['us07','us08','us09','us13','us53','us54','us64','us75','us76','us80','us81',
+            'us82','us84','us85','us133','us134','us135','us136','us137','us138','us139',
+            'us140','us141','us142','us143','us144','us145'],
+  sports:  ['us14','us18','us29','us34','us37','us38','us66','us67','us68','us69','us70',
+            'us86','us87','us88','us89','us90','us91','us92','us93','us94','us95','us96','us97'],
+  sci:     ['us15','us16','us24','us47','us98','us99','us100','us101','us102'],
+  reality: ['us20','us21','us28','us33','us43','us63','us103','us116','us119','us121','us122'],
+  comedy:  ['us39','us46','us49','us65','us74','us120'],
+  variety: ['us27','us31','us40','us44','us113','us118'],
+  drama:   ['us19','us42','us48','us51','us52','us55','us73','us114','us115','us117'],
+  info:    ['us10','us11','us17','us23','us123'],
+};
+const CH_TYPE_CACHE = {};
 function pickType(chId, h) {
-  if (['us02','us03','us04','us05','us06','us12','us36','us45','us56','us59','us60'].includes(chId)) return 'news';
-  if (['us07','us08','us09','us13','us53','us54'].includes(chId)) return 'movie';
-  if (['us14','us18','us29','us34','us37','us38'].includes(chId)) return 'sports';
-  if (['us15','us16','us24','us47'].includes(chId)) return 'sci';
-  if (['us20','us21','us28','us33','us43'].includes(chId)) return 'reality';
-  if (['us39','us46','us49'].includes(chId)) return 'comedy';
+  if (!CH_TYPE_CACHE[chId]) {
+    for (const [type, ids] of Object.entries(TYPE_MAP)) {
+      if (ids.includes(chId)) { CH_TYPE_CACHE[chId] = type; break; }
+    }
+  }
+  if (CH_TYPE_CACHE[chId]) return CH_TYPE_CACHE[chId];
   if (h>=6&&h<9)   return 'info';
   if (h>=9&&h<12)  return 'variety';
   if (h>=12&&h<14) return 'news';
