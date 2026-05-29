@@ -8,7 +8,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:       #f2f2f7;
+  --bg:       #f4f5fa;
   --sidebar:  #e8e8f0;
   --card:     #ffffff;
   --card2:    #f0f0f8;
@@ -182,10 +182,14 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 .ch-cell:hover { background:var(--card2); }
 .ch-cell.sel { background:var(--accent2); border-left:3px solid var(--accent); padding-left:7px; }
 .ch-ico {
-  font-size:20px; width:34px; height:34px; border-radius:8px;
+  font-size:20px; width:36px; height:36px; border-radius:9px;
   background:var(--card); border:1px solid var(--border);
   display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  overflow:hidden;
 }
+.ch-logo { width:100%; height:100%; object-fit:contain; background:#fff; }
+/* Emoji fallback when the real logo image is missing / failed */
+.ch-ico.noimg::before { content:attr(data-ico); font-size:20px; }
 .ch-txt { min-width:0; }
 .ch-n  { font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text); }
 .ch-np { font-size:10px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
@@ -232,6 +236,15 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 .pb.verified .pb-title { color:#006b28; font-weight:700; }
 .pb.verified .pb-time  { color:#339955; }
 .verified-badge { display:none; }
+/* NOW badge on the currently-airing program */
+.now-badge {
+  position:absolute; top:5px; right:6px;
+  font-size:8.5px; font-weight:900; letter-spacing:.04em; line-height:1.3;
+  color:#fff; background:var(--accent); border-radius:5px; padding:2px 5px;
+}
+/* Category pill colored dot */
+.cat-dot { display:inline-block; width:7px; height:7px; border-radius:50%;
+  margin-right:5px; vertical-align:middle; }
 /* Real-data-only regions: render placeholder (non-verified) blocks as
    empty gaps — keep their width so verified blocks stay time-aligned. */
 .prog-grid.real-only .pb:not(.verified) {
@@ -1110,17 +1123,17 @@ function setTZ(off,label){
 
 // ═══ CHANNEL CATEGORIES ═══════════════════════════════════
 const CATS=[
-  {k:'all',     label:'全部'},
-  {k:'news',    label:'新聞'},
-  {k:'finance', label:'財經'},
-  {k:'ent',     label:'綜合娛樂'},
-  {k:'drama',   label:'戲劇'},
-  {k:'movie',   label:'電影'},
-  {k:'sports',  label:'體育'},
-  {k:'kids',    label:'兒童'},
-  {k:'doc',     label:'知識紀實'},
-  {k:'music',   label:'音樂'},
-  {k:'religion',label:'宗教'},
+  {k:'all',     label:'全部',    color:'#4f5bd5'},
+  {k:'news',    label:'新聞',    color:'#e2483d'},
+  {k:'finance', label:'財經',    color:'#e8912b'},
+  {k:'ent',     label:'綜合娛樂',color:'#3aa85f'},
+  {k:'drama',   label:'戲劇',    color:'#c2497e'},
+  {k:'movie',   label:'電影',    color:'#4f5bd5'},
+  {k:'sports',  label:'體育',    color:'#2a8fd4'},
+  {k:'kids',    label:'兒童',    color:'#e0653a'},
+  {k:'doc',     label:'知識紀實',color:'#1f9e8f'},
+  {k:'music',   label:'音樂',    color:'#8b5cf6'},
+  {k:'religion',label:'宗教',    color:'#b08948'},
 ];
 const CAT_LABEL=Object.fromEntries(CATS.map(c=>[c.k,c.label]));
 const CH_CAT_CACHE={};
@@ -1199,11 +1212,20 @@ function renderCatBar(rid){
     b.className='cat-pill'+(c.k===curCat?' active':'');
     b.dataset.cat=c.k;
     const n=c.k==='all'?channels.length:counts[c.k];
-    b.innerHTML=`${c.label}<span class="cnt">${n}</span>`;
+    b.innerHTML=`<span class="cat-dot" style="background:${c.color}"></span>${c.label}<span class="cnt">${n}</span>`;
     b.onclick=()=>setCat(c.k);
     bar.appendChild(b);
   });
   bar.classList.add('show');
+}
+
+// ═══ CHANNEL LOGOS (real station logos) ═══════════════════
+const US_LOGO_BASE='https://us-tv-guide.com/logos/';
+const TW_LOGO={ 'tw_28':'https://tvking.funorange.com.tw/icon/n21.png','tw_27':'https://tvking.funorange.com.tw/icon/n33.png','tw_118':'https://tvking.funorange.com.tw/icon/n60.png','tw_44':'https://tvking.funorange.com.tw/icon/321.png','tw_29':'https://tvking.funorange.com.tw/icon/n34.png','tw_30':'https://tvking.funorange.com.tw/icon/n35.png','tw_39':'https://tvking.funorange.com.tw/icon/n14.png','tw_36':'https://tvking.funorange.com.tw/icon/n27.png?a=1','tw_10':'https://tvking.funorange.com.tw/icon/010.png','tw_308':'https://tvking.funorange.com.tw/icon/308.png','tw_310':'https://tvking.funorange.com.tw/icon/310.png','tw_13':'https://tvking.funorange.com.tw/icon/013.png','tw_8':'https://tvking.funorange.com.tw/icon/008.png','tw_409':'https://tvking.funorange.com.tw/icon/306.png','tw_6':'https://tvking.funorange.com.tw/icon/006.png','tw_151':'https://tvking.funorange.com.tw/icon/316.png','tw_152':'https://tvking.funorange.com.tw/icon/317.png','tw_314':'https://tvking.funorange.com.tw/icon/n25.png','tw_17':'https://tvking.funorange.com.tw/icon/017.png','tw_32':'https://tvking.funorange.com.tw/icon/n23.png','tw_37':'https://tvking.funorange.com.tw/icon/n37.png','tw_16':'https://tvking.funorange.com.tw/icon/016.png','tw_136':'https://tvking.funorange.com.tw/icon/n143.png','tw_78':'https://tvking.funorange.com.tw/icon/n73.png','tw_12':'https://tvking.funorange.com.tw/icon/012.png','tw_313':'https://tvking.funorange.com.tw/icon/n762.jpeg','tw_33':'https://tvking.funorange.com.tw/icon/n18.png','tw_117':'https://tvking.funorange.com.tw/icon/312.png','tw_266':'https://tvking.funorange.com.tw/icon/304.png','tw_268':'https://tvking.funorange.com.tw/icon/318.png','tw_302':'https://tvking.funorange.com.tw/icon/302.png','tw_303':'https://tvking.funorange.com.tw/icon/303.png','tw_267':'https://tvking.funorange.com.tw/icon/371.png','tw_26':'https://tvking.funorange.com.tw/icon/n24.png','tw_70':'https://tvking.funorange.com.tw/icon/n53.png','tw_77':'https://tvking.funorange.com.tw/icon/n72.png','tw_83':'https://tvking.funorange.com.tw/icon/313.png','tw_215':'https://tvking.funorange.com.tw/icon/377.png','tw_100':'https://tvking.funorange.com.tw/icon/n26.png','tw_45':'https://tvking.funorange.com.tw/icon/n71.png','tw_54':'https://tvking.funorange.com.tw/icon/n20.png','tw_42':'https://tvking.funorange.com.tw/icon/n32.png','tw_311':'https://tvking.funorange.com.tw/icon/311.png','tw_477':'https://tvking.funorange.com.tw/icon/376.png','tw_41':'https://tvking.funorange.com.tw/icon/n22.png','tw_40':'https://tvking.funorange.com.tw/icon/n36.png','tw_81':'https://tvking.funorange.com.tw/icon/357.png','tw_225':'https://tvking.funorange.com.tw/icon/356.png','tw_43':'https://tvking.funorange.com.tw/icon/n29.png','tw_48':'https://tvking.funorange.com.tw/icon/n38.png','tw_115':'https://tvking.funorange.com.tw/icon/503.png','tw_53':'https://tvking.funorange.com.tw/icon/507.png','tw_50':'https://tvking.funorange.com.tw/icon/n40.png','tw_51':'https://tvking.funorange.com.tw/icon/n42.png','tw_57':'https://tvking.funorange.com.tw/icon/n43.png','tw_59':'https://tvking.funorange.com.tw/icon/505.png','tw_49':'https://tvking.funorange.com.tw/icon/506.png','tw_208':'https://tvking.funorange.com.tw/icon/501.png','tw_55':'https://tvking.funorange.com.tw/icon/n41.png','tw_68':'https://tvking.funorange.com.tw/icon/n52.png','tw_66':'https://tvking.funorange.com.tw/icon/n48.png?a=1','tw_62':'https://tvking.funorange.com.tw/icon/n56.png','tw_67':'https://tvking.funorange.com.tw/icon/628.png','tw_80':'https://tvking.funorange.com.tw/icon/613.png','tw_63':'https://tvking.funorange.com.tw/icon/n57.png','tw_200':'https://tvking.funorange.com.tw/icon/n50.png','tw_71':'https://tvking.funorange.com.tw/icon/n49.png','tw_65':'https://tvking.funorange.com.tw/icon/n46.png','tw_190':'https://tvking.funorange.com.tw/icon/n501.png','tw_188':'https://tvking.funorange.com.tw/icon/n503.png','tw_202':'https://tvking.funorange.com.tw/icon/616.png','tw_278':'https://tvking.funorange.com.tw/icon/n137.jpg','tw_276':'https://tvking.funorange.com.tw/icon/276.png','tw_14':'https://tvking.funorange.com.tw/icon/266.png','tw_21':'https://tvking.funorange.com.tw/icon/n61.png','tw_19':'https://tvking.funorange.com.tw/icon/n58.png','tw_205':'https://tvking.funorange.com.tw/icon/254.png','tw_204':'https://tvking.funorange.com.tw/icon/253.png','tw_435':'https://tvking.funorange.com.tw/icon/255.png','tw_256':'https://tvking.funorange.com.tw/icon/256.png','tw_72':'https://tvking.funorange.com.tw/icon/n66.png','tw_171':'https://tvking.funorange.com.tw/icon/105.png','tw_25':'https://tvking.funorange.com.tw/icon/n64.png','tw_175':'https://tvking.funorange.com.tw/icon/107.png','tw_170':'https://tvking.funorange.com.tw/icon/106.png','tw_23':'https://tvking.funorange.com.tw/icon/n148.png','tw_104':'https://tvking.funorange.com.tw/icon/n75.png','tw_116':'https://tvking.funorange.com.tw/icon/521.png','tw_90':'https://tvking.funorange.com.tw/icon/n77.png','tw_111':'https://tvking.funorange.com.tw/icon/009.png','tw_15':'https://tvking.funorange.com.tw/icon/015.png','tw_131':'https://tvking.funorange.com.tw/icon/n580.png','tw_237':'https://tvking.funorange.com.tw/icon/208.png','tw_210':'https://tvking.funorange.com.tw/icon/217.png','tw_238':'https://tvking.funorange.com.tw/icon/209.png','tw_142':'https://tvking.funorange.com.tw/icon/200.png','tw_144':'https://tvking.funorange.com.tw/icon/202.png','tw_143':'https://tvking.funorange.com.tw/icon/201.png','tw_98':'https://tvking.funorange.com.tw/icon/557.png','tw_301':'https://tvking.funorange.com.tw/icon/301.png','tw_88':'https://tvking.funorange.com.tw/icon/350.png','tw_415':'https://tvking.funorange.com.tw/icon/561.png','tw_22':'https://tvking.funorange.com.tw/icon/n65.png','tw_1':'https://tvking.funorange.com.tw/icon/355.png','tw_2103':'https://tvking.funorange.com.tw/icon/300.png','tw_119':'https://tvking.funorange.com.tw/icon/614.png','tw_97':'https://tvking.funorange.com.tw/icon/520.jpeg','tw_491':'https://tvking.funorange.com.tw/icon/332.jpeg','tw_194':'https://tvking.funorange.com.tw/icon/104.png','tw_193':'https://tvking.funorange.com.tw/icon/352.png','tw_195':'https://tvking.funorange.com.tw/icon/353.png','tw_197':'https://tvking.funorange.com.tw/icon/354.png','tw_196':'https://tvking.funorange.com.tw/icon/611.png','tw_441':'https://tvking.funorange.com.tw/icon/615.png','tw_198':'https://tvking.funorange.com.tw/icon/624.png','tw_309':'https://tvking.funorange.com.tw/icon/309.png','tw_265':'https://tvking.funorange.com.tw/icon/265.jpeg','tw_412':'https://tvking.funorange.com.tw/icon/279.jpeg','tw_87':'https://tvking.funorange.com.tw/icon/358.jpeg','tw_169':'https://tvking.funorange.com.tw/icon/372.jpeg','tw_261':'https://tvking.funorange.com.tw/icon/600.jpeg','tw_125':'https://tvking.funorange.com.tw/icon/610.jpeg','tw_191':'https://tvking.funorange.com.tw/icon/629.jpeg','tw_192':'https://tvking.funorange.com.tw/icon/630.jpeg' };
+function channelLogo(ch,rid){
+  if(rid==='tw')return TW_LOGO[ch.id]||'';
+  if(rid==='us'){const s=US_SLUG[ch.id];return s?US_LOGO_BASE+s+'.png':'';}
+  return '';
 }
 
 // ═══ NAVIGATION ═══════════════════════════════════════════
@@ -1270,7 +1292,11 @@ function buildEPG(rid){
     const div=document.createElement('div');
     div.className='ch-cell'+(realOnly?' nodata':''); div.dataset.idx=i;
     div.dataset.cat=channelCategory(ch);
-    div.innerHTML=`<div class="ch-ico">${ch.ico}</div>
+    const logo=channelLogo(ch,rid);
+    const ico=logo
+      ? `<img class="ch-logo" src="${logo}" alt="" loading="lazy" onerror="this.parentElement.classList.add('noimg');this.remove();">`
+      : '';
+    div.innerHTML=`<div class="ch-ico${logo?'':' noimg'}" data-ico="${ch.ico}">${ico}</div>
       <div class="ch-txt">
         <div class="ch-n">${ch.n}</div>
         <div class="ch-np">${cur?cur.title:'—'}</div>
@@ -1317,6 +1343,8 @@ function buildEPG(rid){
         const pct=Math.min(100,((nowRelMin-prog.startMin)/prog.dur)*100);
         const bar=document.createElement('div'); bar.className='pb-bar'; bar.style.width=pct+'%';
         pb.appendChild(bar);
+        const nb=document.createElement('div'); nb.className='now-badge'; nb.textContent='NOW';
+        pb.appendChild(nb);
       }
 
       pb.onclick=(e)=>{
