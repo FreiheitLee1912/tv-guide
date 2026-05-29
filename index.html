@@ -1068,8 +1068,8 @@ function openRegion(rid){
   // Show TZ pills only for US
   const pills=document.getElementById('tzPills');
   const label=document.getElementById('chGapLabel');
-  if(rid==='us'){pills.classList.add('show');label.style.display='none';}
-  else{pills.classList.remove('show');label.style.display='';}
+  if(rid==='us'){pills.classList.add('show');if(label)label.style.display='none';}
+  else{pills.classList.remove('show');if(label)label.style.display='';}
   clearFilter();
   buildEPG(rid);
   selChIdx=0;
