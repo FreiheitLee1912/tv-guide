@@ -291,6 +291,70 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 .prog-scroll::-webkit-scrollbar-track { background:var(--card2); }
 .prog-scroll::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 .prog-scroll::-webkit-scrollbar-thumb:hover { background:var(--muted); }
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — iPad (≤1024px) and phone (≤640px)
+   Grid metrics (--slot-w / --row-h) are driven by JS, so we only
+   scale the sidebar width, typography and chrome here.
+   ═══════════════════════════════════════════════════════════ */
+
+/* iPad / tablet */
+@media (max-width:1024px){
+  :root{ --ch-w:152px; }
+  #hdrTitle{ font-size:16px; }
+  .cat-pill{ font-size:11px; padding:4px 11px; }
+  .dp-title{ font-size:18px; }
+}
+
+/* Phone */
+@media (max-width:640px){
+  :root{ --ch-w:120px; --hdr-h:50px; --time-h:54px; }
+  #hdr{ padding:0 10px; gap:8px; }
+  #backBtn{ width:30px; height:30px; font-size:18px; }
+  #hdrTitle{ font-size:15px; }
+  #hdrSub{ font-size:9px; }
+  .clock .hm{ font-size:15px; }
+  .clock .date{ font-size:9px; }
+
+  /* Home */
+  #pageHome{ padding:14px; }
+  .region-grid{ grid-template-columns:repeat(2,1fr); gap:10px; }
+  .region-card{ padding:20px 8px 14px; border-radius:14px; }
+  .flag{ font-size:40px; }
+  .region-name{ font-size:13px; }
+
+  /* Category bar */
+  .cat-bar{ padding:6px 8px; gap:5px; }
+  .cat-pill{ font-size:11px; padding:4px 10px; border-radius:13px; }
+  .cat-pill .cnt{ font-size:9px; }
+
+  /* Search / TZ in the left gap */
+  .time-ch-gap{ padding:5px 6px; gap:4px; }
+  .ch-search-wrap{ padding:3px 6px; }
+  #chSearch{ font-size:11px; }
+  #chSearch::placeholder{ font-size:10px; }
+  .tz-pill{ font-size:9px; padding:2px 5px; }
+
+  /* Channel cells */
+  .ch-cell{ gap:6px; padding:0 7px; }
+  .ch-ico{ font-size:16px; width:28px; height:28px; border-radius:7px; }
+  .ch-n{ font-size:11px; }
+  .ch-np{ font-size:9px; }
+  .ch-live-dot{ right:6px; }
+
+  /* Program blocks */
+  .pb{ padding:6px 7px; }
+  .pb-title{ font-size:11px; }
+  .pb-time{ font-size:9px; margin-top:2px; }
+
+  /* Detail panel → full-width bottom sheet */
+  #detailPanel.open{ max-height:50vh; }
+  .dp-inner{ padding:14px 16px 18px; gap:0 12px; }
+  .dp-ico{ font-size:30px; }
+  .dp-title{ font-size:16px; }
+  .dp-desc{ font-size:12px; margin-top:8px; line-height:1.55;
+            max-height:28vh; overflow-y:auto; }
+}
 </style>
 </head>
 <body>
@@ -1271,15 +1335,27 @@ function buildEPG(rid){
   const nowX=(nowMin-GRID_S*60)*MIN_PX;
   document.getElementById('nowLine').style.left=Math.max(0,nowX)+'px';
 
-  // Scroll sync
+  // Scroll sync — single source of truth per frame to prevent drift.
+  // The mutual scrollTop assignment used to feed back on itself, so the
+  // sidebar and grid slowly drifted out of alignment while dragging.
   const progScroll=document.getElementById('progScroll');
   const timeSlotsWrap=document.getElementById('timeSlotsWrap');
   const chSidebar=document.getElementById('chSidebar');
+  let vLock=false;
+  const slotsInner=timeSlotsWrap.querySelector('.time-slots');
   progScroll.onscroll=()=>{
-    timeSlotsWrap.querySelector('.time-slots').style.transform=`translateX(-${progScroll.scrollLeft}px)`;
+    slotsInner.style.transform=`translateX(-${progScroll.scrollLeft}px)`;
+    if(vLock)return;
+    vLock=true;
     chSidebar.scrollTop=progScroll.scrollTop;
+    requestAnimationFrame(()=>{vLock=false;});
   };
-  chSidebar.onscroll=()=>{ progScroll.scrollTop=chSidebar.scrollTop; };
+  chSidebar.onscroll=()=>{
+    if(vLock)return;
+    vLock=true;
+    progScroll.scrollTop=chSidebar.scrollTop;
+    requestAnimationFrame(()=>{vLock=false;});
+  };
 
   // Scroll to now
   requestAnimationFrame(()=>{
