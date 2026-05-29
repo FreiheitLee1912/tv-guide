@@ -427,12 +427,21 @@ const CHANNELS = {
     {id:'tw_484',n:'MOMO購物2',     ico:'🛒',num:'484'},
   ],
   hk:[
-    {id:'hk01',n:'TVB翡翠台',  ico:'💎',num:'201'},
-    {id:'hk02',n:'TVB明珠台',  ico:'🌟',num:'202'},
-    {id:'hk03',n:'ViuTV',      ico:'📺',num:'99' },
-    {id:'hk04',n:'鳳凰衛視',   ico:'🦚',num:'204'},
-    {id:'hk05',n:'鳳凰資訊台', ico:'📰',num:'71' },
-    {id:'hk06',n:'無綫新聞台', ico:'🔵',num:'72' },
+    {id:'hk01',n:'TVB翡翠台',   ico:'💎',num:'81' },
+    {id:'hk02',n:'TVB明珠台',   ico:'🌟',num:'84' },
+    {id:'hk03',n:'ViuTV',       ico:'📺',num:'99' },
+    {id:'hk07',n:'TVB Plus',    ico:'➕',num:'85' },
+    {id:'hk08',n:'ViuTVsix',    ico:'6️⃣',num:'96' },
+    {id:'hk09',n:'Viu',         ico:'📱',num:'95' },
+    {id:'hk10',n:'港台電視31',  ico:'📻',num:'31' },
+    {id:'hk11',n:'港台電視32',  ico:'📻',num:'32' },
+    {id:'hk12',n:'港台電視33',  ico:'📻',num:'33' },
+    {id:'hk13',n:'HBO',         ico:'🎬',num:'110'},
+    {id:'hk14',n:'now Sports 1',ico:'⚽',num:'670'},
+    {id:'hk15',n:'beIN Sports 1',ico:'🏆',num:'680'},
+    {id:'hk04',n:'鳳凰衛視',    ico:'🦚',num:'204'},
+    {id:'hk05',n:'鳳凰資訊台',  ico:'📰',num:'205'},
+    {id:'hk06',n:'無綫新聞台',  ico:'🔵',num:'88' },
   ],
   cn:[
     {id:'cn01',n:'CCTV-1 綜合', ico:'📡',num:'301'},
@@ -932,7 +941,7 @@ function openRegion(rid){
   ST.region=rid; ST.cat='all'; ST.query=''; ST.progs={};
   const r=REGIONS[rid];
   const channels=CHANNELS[rid]||[];
-  const realOnly=(rid==='us'||rid==='tw');
+  const realOnly=(rid==='us'||rid==='tw'||rid==='hk');
   const totalW=(GRID_END-GRID_START)*PX_MIN;
 
   // category counts (whole region)
@@ -1003,6 +1012,7 @@ function openRegion(rid){
   // fetch real data
   if(rid==='us') loadUS(channels);
   else if(rid==='tw') loadTW(channels);
+  else if(rid==='hk') loadHK(channels);
   // other regions: channels shown with empty tracks (no real source)
   if(!realOnly){ root.querySelectorAll('.epg-row').forEach(r=>r.classList.remove('hidden')); }
 
@@ -1089,6 +1099,31 @@ async function loadTW(channels){
       }catch(e){}
     }));
     await new Promise(r=>setTimeout(r,150));
+  }
+  applyFilter();
+}
+
+// ── Hong Kong via tvsch.com (startDate/endDate/title, HK local time) ──
+const HK_TVSCH={ hk01:'tvb-jade', hk02:'tvb-pearl', hk03:'viutv', hk07:'tvb-plus',
+  hk08:'viutvsix', hk09:'viu', hk10:'rthk-tv-31', hk11:'rthk-tv-32', hk12:'rthk-tv-33',
+  hk13:'hbo', hk14:'now-sports-1', hk15:'bein-sports-1' };
+const HK_CACHE={};
+function parseTvschPrograms(html){
+  const re=/itemprop="startDate" content="([^"]+)"[\s\S]{0,140}?itemprop="endDate" content="([^"]+)"[\s\S]{0,200}?class="title"[^>]*>\s*([^<]+?)\s*</g;
+  const toMin=iso=>{ const t=iso.split('T')[1]||''; const [h,m]=t.split(':').map(Number); let mm=h*60+m; if(h<5)mm+=1440; return mm; };
+  const out=[]; let m;
+  while((m=re.exec(html))){ let s=toMin(m[1]), e=toMin(m[2]); if(e<=s)e+=1440; out.push({start:s,end:e,name:m[3]}); }
+  return out;
+}
+async function loadHK(channels){
+  const entries=Object.entries(HK_TVSCH).map(([id,slug])=>[slug,channels.findIndex(c=>c.id===id)]).filter(([,ix])=>ix>=0);
+  for(let i=0;i<entries.length;i+=4){
+    await Promise.all(entries.slice(i,i+4).map(async([slug,ix])=>{
+      try{ let progs=HK_CACHE[slug]; if(!progs){ const html=await proxyGet(`https://tvsch.com/hk/channel/${slug}/`); progs=parseTvschPrograms(html); HK_CACHE[slug]=progs; }
+        fillTrack(ix,progs);
+      }catch(e){}
+    }));
+    await new Promise(r=>setTimeout(r,180));
   }
   applyFilter();
 }
